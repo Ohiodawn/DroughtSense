@@ -22,6 +22,7 @@ DroughtSense AI is an advanced, web-based agentic system designed to help farmer
 - **Backend:** Python, Flask.
 - **Frontend:** HTML5, CSS3, Vanilla JavaScript.
 - **Data Sources:** NASA POWER API, Geocoding, CGIAR/Gardian (Training).
+- **Hosting:** Railway.app (Live Production).
 
 ## 🚀 The Moat: Custom Fine-Tuning on AMD
 We don't just use a model; we build one. **DroughtSense-Qwen** is fine-tuned on 45,000+ agricultural research publications (CGIAR) and crop optimization datasets using AMD MI300X and LoRA.

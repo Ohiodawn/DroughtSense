@@ -98,5 +98,5 @@ Provide your assessment in the requested JSON format.
 
 ## 🚀 Deployment Strategy
 1. **AMD Droplet:** Left running during the hackathon period, exposing the vLLM port (e.g., 8000) securely (via IP whitelisting or bearer tokens).
-2. **Web App:** Deployed on Render.com or Railway.app as a standard Python WSGI web service (using `gunicorn`). 
+2. **Web App:** Deployed on **Railway.app** as a standard Python WSGI web service (using `gunicorn`). 
 3. **Environment Secrets:** The deployed Web App holds the `AMD_VLLM_BASE_URL` and `AMD_VLLM_API_KEY` to authenticate against the MI300X instance.

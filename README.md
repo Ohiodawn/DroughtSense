@@ -14,7 +14,7 @@
 [![Python 3.9+](https://img.shields.io/badge/Python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![AMD ROCm](https://img.shields.io/badge/AMD-ROCm-red.svg)](https://www.amd.com/en/graphics/servers-solutions-rocm)
 [![Built for AMD Hackathon ACT II](https://img.shields.io/badge/Hackathon-AMD_ACT_II-orange.svg)](https://lablab.ai/event/amd-developer-hackathon-act-ii)
-[![Deployment Status](https://img.shields.io/badge/Deployment-Live-success.svg)](https://droughtsense.onrender.com)
+[![Deployment Status](https://img.shields.io/badge/Deployment-Live-success.svg)](https://droughtsense-ai.railway.app)
 [![Pytest Passing](https://img.shields.io/badge/Tests-Passing-brightgreen.svg)](https://github.com/Ohiodawn/DroughtSense/actions)
 
 **DroughtSense AI is a hyper-local, multi-agent reasoning system that transforms live NASA climate data into actionable agricultural intelligence using a custom model fine-tuned on AMD MI300X hardware.**
@@ -23,7 +23,7 @@
 
 ## 🚀 Live Demo
 
-[![DroughtSense App Screenshot](https://img.shields.io/badge/View_Live_Application-Click_Here-2e7d32?style=for-the-badge&logo=render)](https://droughtsense.onrender.com)
+[![DroughtSense App Screenshot](https://img.shields.io/badge/View_Live_Application-Click_Here-0b0d0e?style=for-the-badge&logo=railway)](https://droughtsense-ai.railway.app)
 
 *The screenshot above (placeholder) demonstrates the full assessment pipeline: from region input to live climate stats, evidence-backed AI reasoning, and scientific citations.*
 
@@ -51,7 +51,7 @@ DroughtSense AI democratizes agricultural intelligence by bridging the gap betwe
 
 ```mermaid
 graph TD
-    User[User Browser] -->|POST /api/assess| Flask[Flask App on Railway/Render]
+    User[User Browser] -->|POST /api/assess| Flask[Flask App on Railway]
     
     subgraph Data Acquisition
         Flask -->|1. Geocode| Nominatim[Nominatim Geocoding]
@@ -111,7 +111,7 @@ graph TD
 | **Geocoding** | Nominatim (OpenStreetMap) |
 | **Climate Data** | NASA POWER API |
 | **Caching** | Flask-Caching (FileSystem) |
-| **Hosting** | Render.com / Railway |
+| **Hosting** | Railway.app |
 | **Testing** | Pytest / Requests-Mock |
 | **License** | MIT License |
 

@@ -56,5 +56,5 @@ The project follows a **Local-First** strategy, building out the intelligence an
 *   **Completion Condition:** Real-time multi-agent inference running on the unique fine-tuned model via AMD hardware.
 
 ### Phase 8: Production & Submission (Release Layer)
-*   **Stages:** Gunicorn setup, Deployment (Render/Railway), E2E Testing, Video/Deck creation.
+*   **Stages:** Gunicorn setup, Deployment to **Railway.app**, E2E Testing, Video/Deck creation.
 *   **Completion Condition:** Project submitted on lablab.ai and publicly accessible.
