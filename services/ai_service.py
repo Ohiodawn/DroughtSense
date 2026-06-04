@@ -119,6 +119,10 @@ class SynthesizerAgent:
 
     @staticmethod
     def finalize(climatology_report, agronomy_report, graph_context):
+        """
+        Synthesizes the final report. 
+        Always returns the raw assessment object (not wrapped in logs).
+        """
         user_content = (
             f"CLIMATOLOGIST REPORT:\n{climatology_report}\n\n"
             f"AGRONOMIST REPORT:\n{agronomy_report}\n\n"
@@ -138,9 +142,9 @@ class SynthesizerAgent:
                 clean_json = result.replace('```json', '').replace('```', '').strip()
                 return json.loads(clean_json)
             except:
-                print("Failed to parse synthesizer JSON, using fallback.")
+                print("WARN: Failed to parse synthesizer JSON, using fallback.")
         
-        return MockAI.assess_drought(climatology_report, agronomy_report, graph_context)
+        return MockAI.generate_flat_report(climatology_report, agronomy_report, graph_context)
 
 # ==========================================
 # 3. ORCHESTRATOR
@@ -151,23 +155,28 @@ class AIAgentOrchestrator:
     def assess_drought(region_data):
         """
         Executes the multi-agent workflow powered by AMD MI300X.
+        Includes global failover to MockAI.
         """
-        region = region_data.get('region')
-        graph_context = GraphService.get_drought_context()
-        
-        climatology_report = ClimatologistAgent.analyze(region, region_data, graph_context)
-        agronomy_report = AgronomistAgent.advise(region, climatology_report)
-        
-        final_json = SynthesizerAgent.finalize(climatology_report, agronomy_report, graph_context)
+        try:
+            region = region_data.get('region')
+            graph_context = GraphService.get_drought_context()
+            
+            climatology_report = ClimatologistAgent.analyze(region, region_data, graph_context)
+            agronomy_report = AgronomistAgent.advise(region, climatology_report)
+            
+            final_json = SynthesizerAgent.finalize(climatology_report, agronomy_report, graph_context)
 
-        return {
-            "assessment": final_json,
-            "agent_logs": [
-                {"agent": "Climatologist", "status": "Analyzing environmental patterns on AMD MI300X...", "report": climatology_report},
-                {"agent": "Agronomist", "status": "Devising hyper-local strategies...", "report": agronomy_report},
-                {"agent": "Synthesizer", "status": "Finalizing agricultural report...", "report": "Consolidated insights."}
-            ]
-        }
+            return {
+                "assessment": final_json,
+                "agent_logs": [
+                    {"agent": "Climatologist", "status": "Analyzing environmental patterns on AMD MI300X...", "report": climatology_report},
+                    {"agent": "Agronomist", "status": "Devising hyper-local strategies...", "report": agronomy_report},
+                    {"agent": "Synthesizer", "status": "Finalizing agricultural report...", "report": "Consolidated insights."}
+                ]
+            }
+        except Exception as e:
+            print(f"ORCHESTRATOR_CRITICAL_ERROR: {e}")
+            return MockAI.generate_full_response(region_data)
 
 # ==========================================
 # 4. MOCK FALLBACK (FOR SAFETY)
@@ -175,22 +184,51 @@ class AIAgentOrchestrator:
 
 class MockAI:
     @staticmethod
-    def assess_drought(clim_report, agro_report, graph_context):
+    def generate_flat_report(clim_report, agro_report, graph_context):
+        """Heuristic-based fallback returning a raw assessment object."""
         risk = "Low"
+        combined = f"{clim_report} {agro_report}".lower()
         for r in ["Critical", "High", "Medium"]:
-            if r.lower() in clim_report.lower():
+            if r.lower() in combined:
                 risk = r
                 break
         
         return {
             "risk_level": risk,
-            "explanation": f"The analysis indicates a {risk} risk. Environmental conditions suggest specific stresses in the region.",
+            "explanation": f"System determined a {risk} vulnerability level based on environmental indicators.",
             "recommendations": [
-                "Implement water-saving irrigation.",
-                "Select drought-tolerant crop varieties.",
-                "Increase organic matter in soil."
+                "Optimize irrigation cycles for maximum water efficiency.",
+                "Implement soil moisture conservation techniques.",
+                "Review crop selection for drought-tolerant alternatives."
             ],
-            "citations": "Knowledge Graph Context utilized." if graph_context else "Standard meteorological patterns."
+            "citations": "Knowledge Graph Context applied." if graph_context else "General meteorological patterns."
+        }
+
+    @staticmethod
+    def generate_full_response(region_data):
+        """Mock fallback for the entire orchestrator flow if AI provider fails."""
+        precip = region_data.get('precipitation', 100)
+        risk = "Low"
+        if precip < 30: risk = "High"
+        elif precip < 70: risk = "Medium"
+
+        assessment = {
+            "risk_level": risk,
+            "explanation": f"Sensor analysis for {region_data.get('region')} indicates {risk} risk conditions.",
+            "recommendations": [
+                "Prioritize water allocation.",
+                "Implement mulching.",
+                "Monitor forecasts."
+            ],
+            "citations": "System Baseline"
+        }
+        
+        return {
+            "assessment": assessment,
+            "agent_logs": [
+                {"agent": "System", "status": "Executing Failover Protocol...", "report": "AI Core Connectivity Interrupted."},
+                {"agent": "MockAI", "status": "Generating Heuristic Report...", "report": "Heuristic analysis complete."}
+            ]
         }
 
 class AMDInference:
