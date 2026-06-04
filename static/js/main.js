@@ -17,8 +17,15 @@ document.addEventListener('DOMContentLoaded', () => {
     assessForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         
-        const region = regionInput.value.trim();
+        let region = regionInput.value.trim();
         if (!region) return;
+
+        // Basic frontend sanitization
+        region = region.replace(/[<>]/g, "").substring(0, 100);
+        if (region.length < 2) {
+            alert("Please enter a valid region name.");
+            return;
+        }
 
         // Reset UI
         resultSection.classList.add('hidden');

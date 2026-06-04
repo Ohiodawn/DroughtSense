@@ -1,5 +1,6 @@
 flask
 Flask-Caching
+bleach
 python-dotenv
 requests
 openai

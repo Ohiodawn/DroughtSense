@@ -1,5 +1,7 @@
 import os
 import json
+import bleach
+import re
 from flask import Flask, request, jsonify, render_template
 from flask_caching import Cache
 from dotenv import load_dotenv
@@ -31,13 +33,30 @@ def get_cached_coordinates(region):
 def get_cached_climate(lat, lon):
     return fetch_climate_data(lat, lon)
 
+def sanitize_region(region):
+    """
+    Cleans and validates the region input string.
+    """
+    if not region:
+        return None
+    # Strip HTML tags
+    cleaned = bleach.clean(region, tags=[], strip=True)
+    # Remove any characters that aren't alphanumeric, spaces, commas, or hyphens
+    cleaned = re.sub(r'[^\w\s,\-]', '', cleaned)
+    # Limit length
+    return cleaned.strip()[:100]
+
 @app.route('/api/assess', methods=['POST'])
 def assess():
     data = request.json
-    region = data.get('region')
+    raw_region = data.get('region')
     
-    if not region:
+    if not raw_region:
         return jsonify({"error": "Region name is required"}), 400
+
+    region = sanitize_region(raw_region)
+    if not region or len(region) < 2:
+        return jsonify({"error": "Invalid region name provided"}), 400
     
     # 1. Geocode (Cached)
     lat, lon = get_cached_coordinates(region)
