@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
+- **Phase 3 Complete:** Implemented a sophisticated **Multi-Agent Orchestration** workflow in `services/ai_service.py`, moving from single-shot prompts to specialized roles (Climatologist, Agronomist, Synthesizer).
 - **Fine-Tuning Architecture:** Integrated the comprehensive AMD-accelerated Fine-Tuning phase into the project roadmap.
 - Created `fine_tuning/` directory containing the full training pipeline:
   - `prepare_dataset.py`: Script to curate agricultural datasets from Hugging Face (CGIAR, Agri-LLM, etc.) into a Q&A format.
