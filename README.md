@@ -14,7 +14,7 @@
 [![Python 3.9+](https://img.shields.io/badge/Python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![AMD ROCm](https://img.shields.io/badge/AMD-ROCm-red.svg)](https://www.amd.com/en/graphics/servers-solutions-rocm)
 [![Built for AMD Hackathon ACT II](https://img.shields.io/badge/Hackathon-AMD_ACT_II-orange.svg)](https://lablab.ai/event/amd-developer-hackathon-act-ii)
-[![Deployment Status](https://img.shields.io/badge/Deployment-Live-success.svg)](https://droughtsense-ai.railway.app)
+[![Deployment Status](https://img.shields.io/badge/Deployment-Live-success.svg)](https://web-production-2344f.up.railway.app/)
 [![Pytest Passing](https://img.shields.io/badge/Tests-Passing-brightgreen.svg)](https://github.com/Ohiodawn/DroughtSense/actions)
 
 **DroughtSense AI is a professional multi-agent reasoning system that transforms live NASA climate data into actionable agricultural intelligence using a custom 7B model fine-tuned on the AMD Instinct™ MI300X.**
@@ -23,7 +23,7 @@
 
 ## 🚀 Live Demo
 
-[![View Live Application](https://img.shields.io/badge/View_Live_Application-Click_Here-0b0d0e?style=for-the-badge&logo=railway)](https://droughtsense-ai.railway.app)
+[![View Live Application](https://img.shields.io/badge/View_Live_Application-Click_Here-0b0d0e?style=for-the-badge&logo=railway)](https://web-production-2344f.up.railway.app/)
 
 *The dashboard features a hyper-local 5-point climate average, interactive 30-day trends, a live Leaflet.js map, and agentic reasoning grounded in 45,000+ scientific publications.*
 
