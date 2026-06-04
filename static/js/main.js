@@ -321,7 +321,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `DS_Report_${lastResult.location.name}.pdf`;
+            const safeName = lastResult.location.name.replace(/[^a-z0-9]/gi, '_');
+            a.download = `DroughtSense_Report_${safeName}.pdf`;
             document.body.appendChild(a);
             a.click();
             a.remove();

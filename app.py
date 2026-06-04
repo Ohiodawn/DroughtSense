@@ -127,21 +127,37 @@ def download_report():
     """
     Generates and returns a PDF drought report.
     """
-    data = request.json
-    location = data.get('location')
-    climate_data = data.get('climate_data')
-    assessment = data.get('assessment')
+    try:
+        data = request.json
+        location = data.get('location')
+        climate_data = data.get('climate_data')
+        assessment = data.get('assessment')
 
-    if not all([location, climate_data, assessment]):
-        return jsonify({"error": "Incomplete data for report generation"}), 400
+        print(f"REPORT_REQUEST: Generating PDF for {location.get('name') if location else 'Unknown'}")
 
-    pdf_bytes = PDFReportService.generate_report(location, climate_data, assessment)
-    
-    return Response(
-        pdf_bytes,
-        mimetype="application/pdf",
-        headers={"Content-disposition": f"attachment; filename=DroughtSense_Report_{location['name'].replace(' ', '_')}.pdf"}
-    )
+        if not all([location, climate_data, assessment]):
+            print("REPORT_ERROR: Incomplete data provided.")
+            return jsonify({"error": "Incomplete data for report generation"}), 400
+
+        pdf_bytes = PDFReportService.generate_report(location, climate_data, assessment)
+        
+        # Ensure it's bytes for the response
+        if isinstance(pdf_bytes, (bytearray, memoryview)):
+            pdf_bytes = bytes(pdf_bytes)
+
+        loc_name = location.get('name', 'Region')
+        filename = f"DroughtSense_Report_{loc_name}.pdf"
+        # Sanitize filename: allow alphanumeric and standard dots/dashes
+        filename = re.sub(r'[^a-zA-Z0-9\.\-]', '_', filename)
+
+        return Response(
+            pdf_bytes,
+            mimetype="application/pdf",
+            headers={"Content-disposition": f"attachment; filename={filename}"}
+        )
+    except Exception as e:
+        print(f"REPORT_CRITICAL_ERROR: {e}")
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
