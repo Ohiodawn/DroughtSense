@@ -3,40 +3,97 @@ document.addEventListener('DOMContentLoaded', () => {
     const regionInput = document.getElementById('regionInput');
     const submitBtn = document.getElementById('submitBtn');
     
+    const locationSelector = document.getElementById('locationSelector');
+    const matchList = document.getElementById('matchList');
+    
     const loadingSection = document.getElementById('loading');
     const loadingStatus = document.getElementById('loadingStatus');
     const agentLogs = document.getElementById('agentLogs');
+    
     const resultSection = document.getElementById('result');
+    const locationBanner = document.getElementById('locationBanner');
+    const resolvedLocation = document.getElementById('resolvedLocation');
+    const largeRegionWarning = document.getElementById('largeRegionWarning');
+    const retryLocation = document.getElementById('retryLocation');
+    
+    const resultRegion = document.getElementById('resultRegion');
+    const riskBadge = document.getElementById('riskBadge');
+    const explanationText = document.getElementById('explanationText');
+    const recommendationsList = document.getElementById('recommendationsList');
+    const citationsSection = document.getElementById('citationsSection');
+    const citationsText = document.getElementById('citationsText');
+    
     const errorSection = document.getElementById('error');
 
+    // Handle initial form submission (Geocoding Step)
     assessForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         
         let region = regionInput.value.trim();
         if (!region) return;
 
-        // Basic frontend sanitization
-        region = region.replace(/[<>]/g, "").substring(0, 100);
-        if (region.length < 2) {
-            alert("Please enter a valid region name.");
-            return;
-        }
-
         // Reset UI
-        resultSection.classList.add('hidden');
-        errorSection.classList.add('hidden');
+        hideAll();
         loadingSection.classList.remove('hidden');
+        loadingStatus.textContent = "Resolving location...";
         agentLogs.innerHTML = '';
+        submitBtn.disabled = true;
+
+        try {
+            const response = await fetch('/api/geocode', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ region })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Geocoding failed');
+            }
+
+            if (data.matches.length === 1) {
+                // Single match: auto-proceed to assessment
+                runAssessment(data.matches[0]);
+            } else {
+                // Multiple matches: show selector
+                showLocationSelector(data.matches);
+            }
+
+        } catch (err) {
+            showError(err.message);
+        } finally {
+            if (locationSelector.classList.contains('hidden') && resultSection.classList.contains('hidden')) {
+                loadingSection.classList.add('hidden');
+            }
+            submitBtn.disabled = false;
+        }
+    });
+
+    function showLocationSelector(matches) {
+        hideAll();
+        matchList.innerHTML = '';
+        matches.forEach(match => {
+            const div = document.createElement('div');
+            div.className = 'match-item';
+            div.innerHTML = `<strong>${match.display_name}</strong><br><small>${match.type} · ${match.lat.toFixed(2)}°N, ${match.lon.toFixed(2)}°E</small>`;
+            div.onclick = () => runAssessment(match);
+            matchList.appendChild(div);
+        });
+        locationSelector.classList.remove('hidden');
+    }
+
+    async function runAssessment(location) {
+        hideAll();
+        loadingSection.classList.remove('hidden');
         loadingStatus.textContent = "Connecting to NASA POWER API...";
         submitBtn.disabled = true;
 
         try {
             const response = await fetch('/api/assess', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ region })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ location })
             });
 
             const data = await response.json();
@@ -45,50 +102,53 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(data.error || 'Failed to generate assessment');
             }
 
-            // Simulate Agent Thinking for UX/Hackathon visibility
             await showAgentLogs(data.agent_logs);
-
-            // Display Results
-            displayResults(region, data);
+            displayResults(data);
 
         } catch (err) {
-            console.error(err);
-            errorSection.querySelector('.error-message').textContent = err.message;
-            errorSection.classList.remove('hidden');
+            showError(err.message);
         } finally {
             loadingSection.classList.add('hidden');
             submitBtn.disabled = false;
         }
-    });
+    }
 
     async function showAgentLogs(logs) {
+        agentLogs.innerHTML = '';
         for (const log of logs) {
             loadingStatus.textContent = log.status;
             const logEl = document.createElement('div');
             logEl.className = 'log-entry';
             logEl.innerHTML = `> [${log.agent}] ${log.status}`;
             agentLogs.appendChild(logEl);
-            // Artificial delay to show the process
-            await new Promise(resolve => setTimeout(resolve, 1500));
+            await new Promise(resolve => setTimeout(resolve, 1000));
         }
     }
 
-    function displayResults(region, data) {
-        const { climate_data, assessment } = data;
+    function displayResults(data) {
+        const { location, climate_data, assessment } = data;
         
-        resultRegion.textContent = region;
+        // Location Info
+        resolvedLocation.textContent = `${location.display_name} (${location.lat.toFixed(2)}°N, ${location.lon.toFixed(2)}°E)`;
+        if (location.is_large) {
+            largeRegionWarning.classList.remove('hidden');
+        } else {
+            largeRegionWarning.classList.add('hidden');
+        }
+
+        resultRegion.textContent = location.name || "Target Region";
         explanationText.textContent = assessment.explanation;
         
-        // Update Climate Stats
+        // Climate Stats
         document.getElementById('tempVal').textContent = climate_data.temperature;
         document.getElementById('precipVal').textContent = climate_data.precipitation;
         document.getElementById('soilVal').textContent = Math.round(climate_data.soil_moisture * 100);
 
-        // Update Risk Badge
+        // Risk Badge
         riskBadge.textContent = `${assessment.risk_level} Risk`;
         riskBadge.className = 'badge ' + assessment.risk_level.toLowerCase();
         
-        // Inject Recommendations
+        // Recommendations
         recommendationsList.innerHTML = '';
         assessment.recommendations.forEach(rec => {
             const li = document.createElement('li');
@@ -96,7 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
             recommendationsList.appendChild(li);
         });
 
-        // Handle Citations
+        // Citations
         if (assessment.citations && assessment.citations !== "None") {
             citationsText.textContent = assessment.citations;
             citationsSection.classList.remove('hidden');
@@ -107,4 +167,24 @@ document.addEventListener('DOMContentLoaded', () => {
         resultSection.classList.remove('hidden');
         resultSection.scrollIntoView({ behavior: 'smooth' });
     }
+
+    function showError(msg) {
+        hideAll();
+        errorSection.querySelector('.error-message').textContent = msg;
+        errorSection.classList.remove('hidden');
+    }
+
+    function hideAll() {
+        locationSelector.classList.add('hidden');
+        loadingSection.classList.add('hidden');
+        resultSection.classList.add('hidden');
+        errorSection.classList.add('hidden');
+    }
+
+    retryLocation.onclick = (e) => {
+        e.preventDefault();
+        hideAll();
+        regionInput.focus();
+        regionInput.select();
+    };
 });

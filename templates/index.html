@@ -22,23 +22,42 @@
                 <form id="assessForm">
                     <div class="input-group">
                         <i class="fas fa-map-marker-alt"></i>
-                        <input type="text" id="regionInput" placeholder="Enter your region or city (e.g. Nairobi, Kenya)" required>
+                        <input type="text" id="regionInput" placeholder="Enter region or city (e.g. Maharashtra, India)" required>
                     </div>
                     <button type="submit" id="submitBtn">
                         <i class="fas fa-search"></i> Assess Risk
                     </button>
                 </form>
+                <p class="input-hint">Examples: Central Luzon, Philippines · Maharashtra, India · Oromia, Ethiopia</p>
+            </section>
+
+            <!-- Multiple Match Selection -->
+            <section id="locationSelector" class="hidden">
+                <div class="selector-card">
+                    <h3><i class="fas fa-map-signs"></i> Multiple locations found</h3>
+                    <p>Please select the correct region to continue:</p>
+                    <div id="matchList" class="match-list"></div>
+                </div>
             </section>
 
             <section id="loading" class="hidden">
                 <div class="spinner"></div>
                 <p id="loadingStatus">Fetching climate data...</p>
-                <div id="agentLogs" class="agent-logs">
-                    <!-- Agent logs will be streamed here -->
-                </div>
+                <div id="agentLogs" class="agent-logs"></div>
             </section>
 
             <section id="result" class="hidden">
+                <div id="locationBanner" class="location-banner">
+                    <i class="fas fa-location-dot"></i> 
+                    <span id="resolvedLocation">Location info here</span>
+                    <a href="#" id="retryLocation">Not your location? Try again</a>
+                </div>
+
+                <div id="largeRegionWarning" class="warning-banner hidden">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Large region detected. Climate data represents a 5-point average of the central area.
+                </div>
+
                 <div class="card" id="riskCard">
                     <div class="card-header">
                         <span id="riskBadge" class="badge">Low Risk</span>
@@ -49,24 +68,25 @@
                             <div class="stat-item">
                                 <i class="fas fa-temperature-high"></i>
                                 <span id="tempVal">--</span>°C
+                                <label>Avg Temp</label>
                             </div>
                             <div class="stat-item">
                                 <i class="fas fa-cloud-rain"></i>
                                 <span id="precipVal">--</span>mm
+                                <label>Total Rain</label>
                             </div>
                             <div class="stat-item">
                                 <i class="fas fa-tint"></i>
                                 <span id="soilVal">--</span>%
+                                <label>Soil Moist.</label>
                             </div>
                         </div>
 
                         <h3><i class="fas fa-info-circle"></i> AI Assessment</h3>
-                        <p id="explanationText">Analysis goes here...</p>
+                        <p id="explanationText"></p>
                         
                         <h3><i class="fas fa-list-ul"></i> Recommendations</h3>
-                        <ul id="recommendationsList">
-                            <!-- Recommendations will be injected here -->
-                        </ul>
+                        <ul id="recommendationsList"></ul>
 
                         <div id="citationsSection" class="hidden">
                             <h3><i class="fas fa-book"></i> Scientific Citations</h3>
@@ -77,7 +97,10 @@
             </section>
 
             <section id="error" class="hidden">
-                <p class="error-message"></p>
+                <div class="error-card">
+                    <i class="fas fa-circle-exclamation"></i>
+                    <p class="error-message"></p>
+                </div>
             </section>
         </main>
 
