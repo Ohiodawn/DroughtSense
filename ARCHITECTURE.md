@@ -11,13 +11,13 @@ graph TD
     A[User / Farmer] -->|1. Enters Region| B[Frontend UI]
     B -->|POST /api/assess| C[Flask Backend]
     
-    subgraph Context Gathering
+    subgraph "Context Gathering"
         C -->|2. Geocode| D[Geocoding Service]
         C -->|3. Fetch Climate Data| E[NASA POWER API]
         C -->|4. Query Graph| F[Graphify Knowledge Graph]
     end
     
-    subgraph Multi-Agent Orchestration (AMD MI300X)
+    subgraph "Multi-Agent Orchestration (AMD MI300X)"
         C -->|5. Dispatch| G[Orchestrator Agent]
         G -->|Meteorological Task| H[Climatologist Agent]
         G -->|Mitigation Task| I[Agronomist Agent]
@@ -26,7 +26,7 @@ graph TD
         J -->|DroughtSense-7B| G
     end
 
-    subgraph Presentation & Utility
+    subgraph "Presentation & Utility"
         C -->|6. Render| K[Interactive Dashboard]
         K -->|Chart.js| L[30-Day Trends]
         K -->|Leaflet.js| M[Geospatial Map]
