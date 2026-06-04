@@ -11,10 +11,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const agentLogs = document.getElementById('agentLogs');
     
     const resultSection = document.getElementById('result');
-    const locationBanner = document.getElementById('locationBanner');
     const resolvedLocation = document.getElementById('resolvedLocation');
     const largeRegionWarning = document.getElementById('largeRegionWarning');
     const retryLocation = document.getElementById('retryLocation');
+    const downloadPdfBtn = document.getElementById('downloadPdfBtn');
     
     const resultRegion = document.getElementById('resultRegion');
     const riskBadge = document.getElementById('riskBadge');
@@ -22,51 +22,54 @@ document.addEventListener('DOMContentLoaded', () => {
     const recommendationsList = document.getElementById('recommendationsList');
     const citationsSection = document.getElementById('citationsSection');
     const citationsText = document.getElementById('citationsText');
+    
     const errorSection = document.getElementById('error');
-    const downloadPdfBtn = document.getElementById('downloadPdfBtn');
 
     let trendsChart = null;
     let map = null;
     let marker = null;
     let lastResult = null;
 
-    // Initialize Map
+    // Initialize Map with custom style
     function initMap() {
         if (map) return;
-        map = L.map('map').setView([0, 0], 2);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributors'
+        map = L.map('map', {
+            zoomControl: false,
+            scrollWheelZoom: false
+        }).setView([0, 0], 2);
+        
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+            subdomains: 'abcd',
+            maxZoom: 20
         }).addTo(map);
+
+        L.control.zoom({ position: 'bottomright' }).addTo(map);
     }
 
     function updateMap(lat, lon, name) {
         initMap();
         const coords = [lat, lon];
-        map.setView(coords, 8);
+        map.setView(coords, 10);
         
         if (marker) {
-            marker.setLatLng(coords).setPopupContent(name);
+            marker.setLatLng(coords).setPopupContent(`<b>${name}</b>`);
         } else {
-            marker = L.marker(coords).addTo(map).bindPopup(name).openPopup();
+            marker = L.marker(coords).addTo(map).bindPopup(`<b>${name}</b>`).openPopup();
         }
         
-        // Fix Leaflet sizing issue in hidden containers
-        setTimeout(() => {
-            map.invalidateSize();
-        }, 100);
+        setTimeout(() => map.invalidateSize(), 100);
     }
 
-    // Handle initial form submission (Geocoding Step)
+    // Handle initial form submission
     assessForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        
-        let region = regionInput.value.trim();
+        const region = regionInput.value.trim();
         if (!region) return;
 
-        // Reset UI
         hideAll();
         loadingSection.classList.remove('hidden');
-        loadingStatus.textContent = "Resolving location...";
+        loadingStatus.textContent = "Locating agricultural region...";
         agentLogs.innerHTML = '';
         submitBtn.disabled = true;
 
@@ -78,59 +81,17 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.error || 'Geocoding failed');
-            }
+            if (!response.ok) throw new Error(data.error || 'Geocoding failed');
 
             if (data.matches.length === 1) {
-                // Single match: auto-proceed to assessment
                 runAssessment(data.matches[0]);
             } else {
-                // Multiple matches: show selector
                 showLocationSelector(data.matches);
             }
-
         } catch (err) {
             showError(err.message);
         } finally {
-            if (locationSelector.classList.contains('hidden') && resultSection.classList.contains('hidden')) {
-                loadingSection.classList.add('hidden');
-            }
             submitBtn.disabled = false;
-        }
-    });
-
-    // Handle PDF Download
-    downloadPdfBtn.addEventListener('click', async () => {
-        if (!lastResult) return;
-
-        downloadPdfBtn.disabled = true;
-        const originalText = downloadPdfBtn.innerHTML;
-        downloadPdfBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
-
-        try {
-            const response = await fetch('/api/report', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(lastResult)
-            });
-
-            if (!response.ok) throw new Error('Failed to generate PDF');
-
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `DroughtSense_Report_${lastResult.location.name}.pdf`;
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-        } catch (err) {
-            alert("Error downloading PDF: " + err.message);
-        } finally {
-            downloadPdfBtn.disabled = false;
-            downloadPdfBtn.innerHTML = originalText;
         }
     });
 
@@ -139,8 +100,14 @@ document.addEventListener('DOMContentLoaded', () => {
         matchList.innerHTML = '';
         matches.forEach(match => {
             const div = document.createElement('div');
-            div.className = 'match-item';
-            div.innerHTML = `<strong>${match.display_name}</strong><br><small>${match.type} · ${match.lat.toFixed(2)}°N, ${match.lon.toFixed(2)}°E</small>`;
+            div.className = 'match-item-new';
+            div.innerHTML = `
+                <div>
+                    <strong>${match.display_name}</strong><br>
+                    <small style="color: var(--text-muted)">${match.type} · ${match.lat.toFixed(2)}°N, ${match.lon.toFixed(2)}°E</small>
+                </div>
+                <i class="fas fa-chevron-right" style="color: var(--primary)"></i>
+            `;
             div.onclick = () => runAssessment(match);
             matchList.appendChild(div);
         });
@@ -150,7 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function runAssessment(location) {
         hideAll();
         loadingSection.classList.remove('hidden');
-        loadingStatus.textContent = "Connecting to NASA POWER API...";
+        loadingStatus.textContent = "Connecting to NASA POWER Network...";
         submitBtn.disabled = true;
 
         try {
@@ -161,14 +128,10 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.error || 'Failed to generate assessment');
-            }
+            if (!response.ok) throw new Error(data.error || 'Assessment failed');
 
             await showAgentLogs(data.agent_logs);
             displayResults(data);
-
         } catch (err) {
             showError(err.message);
         } finally {
@@ -183,9 +146,9 @@ document.addEventListener('DOMContentLoaded', () => {
             loadingStatus.textContent = log.status;
             const logEl = document.createElement('div');
             logEl.className = 'log-entry';
-            logEl.innerHTML = `> [${log.agent}] ${log.status}`;
+            logEl.innerHTML = `<span style="color: var(--accent)">●</span> [${log.agent}] ${log.status}`;
             agentLogs.appendChild(logEl);
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            await new Promise(resolve => setTimeout(resolve, 800));
         }
     }
 
@@ -193,8 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
         lastResult = data;
         const { location, climate_data, assessment } = data;
         
-        // Location Info
-        resolvedLocation.textContent = `${location.display_name} (${location.lat.toFixed(2)}°N, ${location.lon.toFixed(2)}°E)`;
+        resolvedLocation.textContent = `${location.display_name}`;
         if (location.is_large) {
             largeRegionWarning.classList.remove('hidden');
         } else {
@@ -206,29 +168,23 @@ document.addEventListener('DOMContentLoaded', () => {
         resultRegion.textContent = location.name || "Target Region";
         explanationText.textContent = assessment.explanation;
         
-        // Climate Stats
-        document.getElementById('tempVal').textContent = climate_data.temperature;
-        document.getElementById('precipVal').textContent = climate_data.precipitation;
-        document.getElementById('soilVal').textContent = Math.round(climate_data.soil_moisture * 100);
+        document.getElementById('tempVal').textContent = `${climate_data.temperature}°C`;
+        document.getElementById('precipVal').textContent = `${climate_data.precipitation}mm`;
+        document.getElementById('soilVal').textContent = `${Math.round(climate_data.soil_moisture * 100)}%`;
 
-        // Risk Badge
         riskBadge.textContent = `${assessment.risk_level} Risk`;
-        riskBadge.className = 'badge ' + assessment.risk_level.toLowerCase();
-        
-        // Render Trends Chart
-        if (climate_data.daily_series) {
-            renderTrends(climate_data.daily_series);
-        }
+        riskBadge.className = 'risk-badge-lg ' + assessment.risk_level.toLowerCase();
 
-        // Recommendations
+        if (climate_data.daily_series) renderTrends(climate_data.daily_series);
+        
         recommendationsList.innerHTML = '';
         assessment.recommendations.forEach(rec => {
             const li = document.createElement('li');
-            li.innerHTML = `<i class="fas fa-check-circle"></i> ${rec}`;
+            li.className = 'rec-item';
+            li.innerHTML = `<i class="fas fa-check-circle"></i> <span>${rec}</span>`;
             recommendationsList.appendChild(li);
         });
 
-        // Citations
         if (assessment.citations && assessment.citations !== "None") {
             citationsText.textContent = assessment.citations;
             citationsSection.classList.remove('hidden');
@@ -242,10 +198,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderTrends(series) {
         const ctx = document.getElementById('trendsChart').getContext('2d');
-        
-        if (trendsChart) {
-            trendsChart.destroy();
-        }
+        if (trendsChart) trendsChart.destroy();
 
         const labels = series.dates.map(d => {
             const m = d.substring(4, 6);
@@ -263,39 +216,33 @@ document.addEventListener('DOMContentLoaded', () => {
                         data: series.precip,
                         borderColor: '#2e7d32',
                         backgroundColor: 'rgba(46, 125, 50, 0.1)',
-                        borderWidth: 2,
+                        borderWidth: 3,
                         yAxisID: 'y',
                         fill: true,
-                        tension: 0.3
+                        pointRadius: 0,
+                        tension: 0.4
                     },
                     {
                         label: 'Temp (°C)',
                         data: series.temp,
                         borderColor: '#f44336',
-                        borderWidth: 2,
+                        borderWidth: 3,
                         yAxisID: 'y1',
-                        tension: 0.3
+                        pointRadius: 0,
+                        tension: 0.4
                     }
                 ]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
                 scales: {
-                    y: {
-                        type: 'linear',
-                        display: true,
-                        position: 'left',
-                        title: { display: true, text: 'Rainfall (mm)' }
-                    },
-                    y1: {
-                        type: 'linear',
-                        display: true,
-                        position: 'right',
-                        grid: { drawOnChartArea: false },
-                        title: { display: true, text: 'Temp (°C)' }
-                    }
-                }
+                    x: { grid: { display: false } },
+                    y: { type: 'linear', display: true, position: 'left', title: { display: true, text: 'Rainfall (mm)' } },
+                    y1: { type: 'linear', display: true, position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: 'Temp (°C)' } }
+                },
+                plugins: { legend: { position: 'top', labels: { usePointStyle: true, boxWidth: 6 } } }
             }
         });
     }
@@ -318,5 +265,35 @@ document.addEventListener('DOMContentLoaded', () => {
         hideAll();
         regionInput.focus();
         regionInput.select();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     };
+
+    downloadPdfBtn.addEventListener('click', async () => {
+        if (!lastResult) return;
+        downloadPdfBtn.disabled = true;
+        const originalText = downloadPdfBtn.innerHTML;
+        downloadPdfBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Generating...';
+
+        try {
+            const response = await fetch('/api/report', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(lastResult)
+            });
+            if (!response.ok) throw new Error('Failed to generate PDF');
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `DroughtSense_Report_${lastResult.location.name}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        } catch (err) {
+            alert("Error downloading PDF: " + err.message);
+        } finally {
+            downloadPdfBtn.disabled = false;
+            downloadPdfBtn.innerHTML = originalText;
+        }
+    });
 });
