@@ -53,9 +53,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Phase 6 Preparation:** Implemented file-based caching for NASA API and Geocoding.
 
 ### Changed
-- Shifted project strategy to **Local-First**, prioritizing local backend/frontend development and data integration before AMD Cloud setup.
-- Reorganized `GEMINI.md` and `MASTERPLAN.md` phases to reflect the local-first roadmap.
-- Expanded `GEMINI.md` phases into a detailed "System Development Lifecycle," explicitly mapping each phase to a specific architectural layer.
+- **Hardware Alignment:** Standardized the project to focus exclusively on the **AMD Instinct™ MI300X** for both multi-agent inference and knowledge graph extraction.
+- Refactored `services/ai_service.py` to remove local LLM fallbacks (Ollama/llama.cpp) and streamline the AMD vLLM pipeline.
+- Updated `README.md` and documentation to emphasize the "AMD-Only" end-to-end open-source stack.
+- Shifted project strategy to **Local-First**, prioritizing local backend/frontend development.
 - Created `README.md` providing a high-level overview, live demo placeholder links, features list, tech stack, and instructions for local setup.
 - Created `ARCHITECTURE.md` detailing the system architecture, component interactions, prompt engineering strategy, and API integration.
 - Created `GEMINI.md` to establish core mandates for the AI agent (reviewing documentation and maintaining this changelog) and to outline the project phases.

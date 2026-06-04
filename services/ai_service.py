@@ -4,11 +4,11 @@ from openai import OpenAI
 from services.graph_service import GraphService
 
 # ==========================================
-# 1. UNDERLYING AI ENGINES (PROVIDERS)
+# 1. UNDERLYING AI ENGINE (AMD MI300X)
 # ==========================================
 
 class AIProvider:
-    """Base class for AI interaction logic."""
+    """Handles interaction with the AMD MI300X vLLM endpoint."""
     @staticmethod
     def get_client():
         base_url = os.getenv('AMD_VLLM_BASE_URL')
@@ -17,12 +17,6 @@ class AIProvider:
         if base_url:
             return OpenAI(base_url=base_url, api_key=api_key), "amd"
             
-        local_provider = os.getenv('LOCAL_AI_PROVIDER', 'mock').lower()
-        if local_provider == 'ollama':
-            return OpenAI(base_url="http://localhost:11434/v1", api_key="ollama"), "ollama"
-        elif local_provider == 'llama.cpp':
-            return OpenAI(base_url="http://localhost:8080/v1", api_key="llama.cpp"), "llama.cpp"
-            
         return None, "mock"
 
     @staticmethod
@@ -30,22 +24,18 @@ class AIProvider:
         client, provider_name = AIProvider.get_client()
         
         if provider_name == "mock":
-            return None # Mock logic handled in agent fallback
+            return None # Fallback handled in agent logic
             
         try:
-            # Adjust model name for local providers if needed
-            target_model = model
-            if provider_name == "ollama": target_model = "llama3.1"
-            if provider_name == "llama.cpp": target_model = "local-model"
-
+            # Native inference on AMD MI300X via vLLM
             response = client.chat.completions.create(
-                model=target_model,
+                model=model,
                 messages=messages,
                 temperature=0.7
             )
             return response.choices[0].message.content
         except Exception as e:
-            print(f"Error calling {provider_name}: {e}")
+            print(f"AMD Inference Error: {e}")
             return None
 
 # ==========================================
@@ -82,7 +72,7 @@ class ClimatologistAgent:
         ]
         
         result = AIProvider.call(messages)
-        return result if result else f"Meteorological analysis for {region} suggests a baseline risk level based on precipitation levels of {climate_data['precipitation']}mm."
+        return result if result else f"Meteorological analysis for {region} suggests a baseline risk level based on precipitation levels."
 
 class AgronomistAgent:
     """Agent responsible for translating climate risk into farm-level actions."""
@@ -143,58 +133,49 @@ class SynthesizerAgent:
         
         result = AIProvider.call(messages)
         
-        # Parse or Fallback
         if result:
             try:
-                # Clean markdown if present
                 clean_json = result.replace('```json', '').replace('```', '').strip()
                 return json.loads(clean_json)
             except:
                 print("Failed to parse synthesizer JSON, using fallback.")
         
-        # Hardcoded fallback if all AI steps fail or we are in Mock mode
         return MockAI.assess_drought(climatology_report, agronomy_report, graph_context)
 
 # ==========================================
-# 3. ORCHESTRATOR (PUBLIC INTERFACE)
+# 3. ORCHESTRATOR
 # ==========================================
 
 class AIAgentOrchestrator:
     @staticmethod
     def assess_drought(region_data):
         """
-        Executes the multi-agent workflow and returns both final JSON and agent logs.
+        Executes the multi-agent workflow powered by AMD MI300X.
         """
         region = region_data.get('region')
         graph_context = GraphService.get_drought_context()
         
-        # Agent 1: Climatology
         climatology_report = ClimatologistAgent.analyze(region, region_data, graph_context)
-        
-        # Agent 2: Agronomy
         agronomy_report = AgronomistAgent.advise(region, climatology_report)
         
-        # Agent 3: Synthesis
         final_json = SynthesizerAgent.finalize(climatology_report, agronomy_report, graph_context)
 
         return {
             "assessment": final_json,
             "agent_logs": [
-                {"agent": "Climatologist", "status": "Analyzing weather patterns...", "report": climatology_report},
-                {"agent": "Agronomist", "status": "Devising crop strategies...", "report": agronomy_report},
-                {"agent": "Synthesizer", "status": "Finalizing report...", "report": "Consolidated climatology and agronomy insights."}
+                {"agent": "Climatologist", "status": "Analyzing environmental patterns on AMD MI300X...", "report": climatology_report},
+                {"agent": "Agronomist", "status": "Devising hyper-local strategies...", "report": agronomy_report},
+                {"agent": "Synthesizer", "status": "Finalizing agricultural report...", "report": "Consolidated insights."}
             ]
         }
 
 # ==========================================
-# 4. MOCK FALLBACK (FOR SAFETY/DEV)
+# 4. MOCK FALLBACK (FOR SAFETY)
 # ==========================================
 
 class MockAI:
     @staticmethod
     def assess_drought(clim_report, agro_report, graph_context):
-        """Heuristic-based fallback if AI steps fail."""
-        # Detect risk level from the climatologist's text if possible
         risk = "Low"
         for r in ["Critical", "High", "Medium"]:
             if r.lower() in clim_report.lower():
@@ -203,16 +184,15 @@ class MockAI:
         
         return {
             "risk_level": risk,
-            "explanation": f"The climatology analysis indicates a {risk} risk. Recent data shows specific environmental stresses in the region.",
+            "explanation": f"The analysis indicates a {risk} risk. Environmental conditions suggest specific stresses in the region.",
             "recommendations": [
                 "Implement water-saving irrigation.",
                 "Select drought-tolerant crop varieties.",
-                "Increase organic matter in soil to improve water retention."
+                "Increase organic matter in soil."
             ],
             "citations": "Knowledge Graph Context utilized." if graph_context else "Standard meteorological patterns."
         }
 
-# Maintain original interface name for compatibility
 class AMDInference:
     @staticmethod
     def assess_drought(region_data):
