@@ -18,6 +18,6 @@ This file tracks potential improvements, optimizations, and feature ideas for Dr
 | 002 | [Current Date] | *Local LLM Integration (Ollama)* | *For a more realistic local development experience before Phase 5, we can use Ollama to run Llama 3 locally.* | 🟡 `Proposed` | *Useful if the user wants to test prompt responses without mocking.* |
 | 003 | [Current Date] | *Graphify Integration* | *Use Knowledge Graphs to connect climate data with scientific research papers and regional policies.* | ✅ `Completed` | *Infrastructure logic implemented.* |
 | 004 | [Current Date] | *Input Sanitization & Validation* | *Ensure the region input is sanitized on the frontend and backend to prevent XSS or injection.* | ✅ `Completed` | *Implemented via bleach and regex.* |
-| 005 | [Current Date] | *Automated Unit Testing* | *Add Python unit tests for the Geocoding and NASA services to ensure reliability.* | 🟡 `Proposed` | *Prevents regressions during AMD integration.* |
+| 005 | [Current Date] | *Automated Unit Testing* | *Add Python unit tests for the Geocoding and NASA services to ensure reliability.* | ✅ `Completed` | *Added pytest suite with requests-mock.* |
 
 *(New suggestions will be added below)*

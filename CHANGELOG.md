@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
+- **Automated Testing:** Implemented a unit test suite using `pytest` and `requests-mock`.
+- Created `tests/test_geocoding.py` and `tests/test_nasa_service.py` with full coverage for data acquisition.
+- Added `pytest` and `requests-mock` to `requirements.txt`.
 - **Security Hardening:** Implemented input sanitization and validation on both frontend and backend.
 - Integrated `bleach` and regex-based cleaning to prevent XSS and injection in the region input.
 - Added frontend length and character checks.

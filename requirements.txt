@@ -5,3 +5,5 @@ python-dotenv
 requests
 openai
 gunicorn
+pytest
+requests-mock
