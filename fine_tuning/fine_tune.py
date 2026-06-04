@@ -5,27 +5,30 @@ from trl import SFTTrainer, SFTConfig
 from datasets import load_dataset
 import os
 
-# Configuration for AMD MI300X (Native ROCm)
-# Ensure you are running this in a ROCm-optimized container/environment.
+# ====================================================================
+# HIGH-PERFORMANCE TRAINING SCRIPT (3-HOUR BUDGET)
+# Optimized for AMD MI300X | Target: Qwen 2.5 7B
+# ====================================================================
 
 def train():
-    # Model configuration
-    model_name = "Qwen/Qwen2.5-1.5B-Instruct"
+    # 1. Model Selection: Upgraded to 7B for superior reasoning
+    model_name = "Qwen/Qwen2.5-7B-Instruct"
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     tokenizer.pad_token = tokenizer.eos_token
     
-    print(f"Loading model: {model_name}")
+    print(f"🚀 Loading High-Performance Base Model: {model_name}")
     model = AutoModelForCausalLM.from_pretrained(
         model_name,
-        torch_dtype=torch.float16,  # float16 is optimized for AMD ROCm
+        torch_dtype=torch.float16, # Native ROCm optimization
         device_map="auto"
     )
 
-    # LoRA config — only trains small adapters (efficient wallpaper method)
+    # 2. LoRA Config: Increased Rank (64) for deeper domain adaptation
+    # Since we have 3 hours and MI300X power, we can learn more complex patterns.
     lora_config = LoraConfig(
-        r=16,                    # rank
-        lora_alpha=32,
-        target_modules=["q_proj", "v_proj"],
+        r=64,                    # Rank increased from 16 to 64
+        lora_alpha=128,          # Alpha scaled (2 * r)
+        target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
         lora_dropout=0.05,
         bias="none",
         task_type="CAUSAL_LM"
@@ -34,44 +37,41 @@ def train():
     model = get_peft_model(model, lora_config)
     model.print_trainable_parameters()
 
-    # Load the agricultural drought dataset
+    # 3. Load Augmented Dataset
     data_path = os.path.join(os.path.dirname(__file__), "drought_training_data.json")
-    if not os.path.exists(data_path):
-        print(f"Error: {data_path} not found. Please run the dataset preparation script first.")
-        return
-
-    print("Loading dataset...")
+    print(f"📂 Loading high-depth dataset from {data_path}")
     dataset = load_dataset("json", data_files=data_path)
 
-    # Training Arguments
+    # 4. Training Arguments: Optimized for 3-hour window
     training_args = SFTConfig(
-        output_dir="./droughtsense-lora",
-        num_train_epochs=3,
-        per_device_train_batch_size=4,
+        output_dir="./droughtsense-lora-7b",
+        num_train_epochs=5,           # Increased epochs for better grounding
+        per_device_train_batch_size=8, # MI300X handles larger batches easily
         gradient_accumulation_steps=4,
-        learning_rate=2e-4,
-        fp16=True,           # Required for AMD ROCm performance
-        logging_steps=10,
-        save_steps=100,
-        max_seq_length=1024,
+        learning_rate=1e-4,
+        fp16=True,                    # Native ROCm support
+        logging_steps=5,
+        save_steps=50,
+        max_seq_length=2048,          # Doubled sequence length for complex research context
+        packing=True,                 # More efficient data utilization
         report_to="none"
     )
 
-    # Trainer setup
+    # 5. Trainer
     trainer = SFTTrainer(
         model=model,
         train_dataset=dataset["train"],
         args=training_args,
     )
 
-    print("Starting training on AMD MI300X...")
+    print(f"🔥 Starting training on AMD MI300X (Budget: ~3 Hours)...")
     trainer.train()
 
-    # Save the LoRA adapter
-    output_dir = "droughtsense-lora-adapter"
+    # 6. Save Adapter
+    output_dir = "droughtsense-lora-adapter-7b"
     model.save_pretrained(output_dir)
     tokenizer.save_pretrained(output_dir)
-    print(f"Fine-tuning complete! Adapter saved to {output_dir}")
+    print(f"✅ Specialized 'DroughtSense-7B' adapter saved to {output_dir}")
 
 if __name__ == "__main__":
     train()
