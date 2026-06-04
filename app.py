@@ -52,6 +52,8 @@ def geocode():
     """
     data = request.json
     raw_region = data.get('region')
+    print(f"API_REQUEST: /api/geocode | Region: {raw_region}")
+    
     if not raw_region:
         return jsonify({"error": "Region name is required"}), 400
     
@@ -61,8 +63,10 @@ def geocode():
         
     matches = geocode_region(region)
     if not matches:
+        print(f"API_ERROR: No matches found for {region}")
         return jsonify({"error": "We couldn't find that location. Try a more specific name like a province or city."}), 404
         
+    print(f"API_SUCCESS: Found {len(matches)} matches.")
     return jsonify({"matches": matches})
 
 @app.route('/api/assess', methods=['POST'])
@@ -71,24 +75,37 @@ def assess():
     Modified assessment route. Now expects a validated location object.
     """
     data = request.json
-    location = data.get('location') # Expects {lat, lon, display_name, is_large, etc}
+    location = data.get('location') 
     
     if not location or 'lat' not in location or 'lon' not in location:
         return jsonify({"error": "Valid location data is required"}), 400
+    
+    print(f"API_REQUEST: /api/assess | Coords: {location['lat']}, {location['lon']}")
     
     lat = float(location['lat'])
     lon = float(location['lon'])
     is_large = location.get('is_large', False)
     
     # 1. Fetch NASA Data (Cached by coords)
-    climate_data = get_cached_climate(lat, lon, is_large)
+    try:
+        climate_data = get_cached_climate(lat, lon, is_large)
+    except Exception as e:
+        print(f"API_ERROR: NASA fetch failed: {e}")
+        return jsonify({"error": "NASA Satellite connection timeout."}), 504
+
     if not climate_data:
+        print("API_ERROR: No climate data returned.")
         return jsonify({"error": "Failed to fetch climate data from NASA POWER API"}), 503
         
     climate_data['region'] = location['display_name']
     
     # 2. Multi-Agent AI Assessment
-    result = AMDInference.assess_drought(climate_data)
+    try:
+        result = AMDInference.assess_drought(climate_data)
+        print("API_SUCCESS: Assessment generated.")
+    except Exception as e:
+        print(f"API_ERROR: Inference failed: {e}")
+        return jsonify({"error": "AI Inference engine is offline."}), 500
     
     return jsonify({
         "location": location,

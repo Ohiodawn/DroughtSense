@@ -1,4 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
+    console.log("DroughtSense System Initialized.");
+
     const assessForm = document.getElementById('assessForm');
     const regionInput = document.getElementById('regionInput');
     const submitBtn = document.getElementById('submitBtn');
@@ -30,33 +32,47 @@ document.addEventListener('DOMContentLoaded', () => {
     let marker = null;
     let lastResult = null;
 
-    // Utilitarian Map Setup
+    // Utilitarian Map Setup with Safety
     function initMap() {
         if (map) return;
-        map = L.map('map', {
-            zoomControl: true,
-            scrollWheelZoom: false,
-            dragging: true
-        }).setView([0, 0], 2);
-        
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; OpenStreetMap contributors',
-            maxZoom: 20
-        }).addTo(map);
+        if (typeof L === 'undefined') {
+            console.error("Leaflet library not loaded.");
+            return;
+        }
+        try {
+            map = L.map('map', {
+                zoomControl: true,
+                scrollWheelZoom: false,
+                dragging: true
+            }).setView([0, 0], 2);
+            
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; OpenStreetMap contributors',
+                maxZoom: 20
+            }).addTo(map);
+        } catch (e) {
+            console.error("Map initialization failed: ", e);
+        }
     }
 
     function updateMap(lat, lon, name) {
         initMap();
-        const coords = [lat, lon];
-        map.setView(coords, 9);
+        if (!map) return;
         
-        if (marker) {
-            marker.setLatLng(coords).setPopupContent(name);
-        } else {
-            marker = L.marker(coords).addTo(map).bindPopup(name).openPopup();
+        try {
+            const coords = [lat, lon];
+            map.setView(coords, 9);
+            
+            if (marker) {
+                marker.setLatLng(coords).setPopupContent(name);
+            } else {
+                marker = L.marker(coords).addTo(map).bindPopup(name).openPopup();
+            }
+            
+            setTimeout(() => map.invalidateSize(), 200);
+        } catch (e) {
+            console.error("Map update failed: ", e);
         }
-        
-        setTimeout(() => map.invalidateSize(), 200);
     }
 
     // Handle Form submission
@@ -79,6 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
         submitBtn.disabled = true;
 
         try {
+            console.log("Executing Geocoding for: ", region);
             const response = await fetch('/api/geocode', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -94,6 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 showLocationSelector(data.matches);
             }
         } catch (err) {
+            console.error("Submission Error: ", err);
             showError(err.message);
         } finally {
             submitBtn.disabled = false;
@@ -126,6 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
         submitBtn.disabled = true;
 
         try {
+            console.log("Executing Assessment for Coords: ", location.lat, location.lon);
             const response = await fetch('/api/assess', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -138,6 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
             await showAgentLogs(data.agent_logs);
             displayResults(data);
         } catch (err) {
+            console.error("Assessment Error: ", err);
             showError(err.message);
         } finally {
             loadingSection.classList.add('hidden');
@@ -146,6 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function showAgentLogs(logs) {
+        if (!logs || !Array.isArray(logs)) return;
         agentLogs.innerHTML = '';
         for (const log of logs) {
             loadingStatus.textContent = `AGENT_${log.agent.toUpperCase()}: EXEC...`;
@@ -153,7 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
             logEl.className = 'log-entry';
             logEl.innerHTML = `> [${new Date().toLocaleTimeString()}] ${log.agent}: ${log.status}`;
             agentLogs.appendChild(logEl);
-            await new Promise(resolve => setTimeout(resolve, 600));
+            await new Promise(resolve => setTimeout(resolve, 800));
         }
     }
 
@@ -180,15 +201,23 @@ document.addEventListener('DOMContentLoaded', () => {
         riskBadge.textContent = `VULNERABILITY: ${assessment.risk_level}`;
         riskBadge.className = 'risk-badge ' + assessment.risk_level.toLowerCase();
 
-        if (climate_data.daily_series) renderTrends(climate_data.daily_series);
+        if (climate_data.daily_series) {
+            try {
+                renderTrends(climate_data.daily_series);
+            } catch (e) {
+                console.error("Chart rendering failed: ", e);
+            }
+        }
         
         recommendationsList.innerHTML = '';
-        assessment.recommendations.forEach(rec => {
-            const div = document.createElement('div');
-            div.className = 'rec-box';
-            div.innerHTML = `<i class="fas fa-check-square"></i> <span>${rec}</span>`;
-            recommendationsList.appendChild(div);
-        });
+        if (assessment.recommendations) {
+            assessment.recommendations.forEach(rec => {
+                const div = document.createElement('div');
+                div.className = 'rec-box';
+                div.innerHTML = `<i class="fas fa-check-square"></i> <span>${rec}</span>`;
+                recommendationsList.appendChild(div);
+            });
+        }
 
         if (assessment.citations && assessment.citations !== "None") {
             citationsText.textContent = assessment.citations;
@@ -202,6 +231,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderTrends(series) {
+        if (typeof Chart === 'undefined') {
+            console.error("Chart.js not loaded.");
+            return;
+        }
         const ctx = document.getElementById('trendsChart').getContext('2d');
         if (trendsChart) trendsChart.destroy();
 
@@ -257,10 +290,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function hideAll() {
-        locationSelector.classList.add('hidden');
-        loadingSection.classList.add('hidden');
-        resultSection.classList.add('hidden');
-        errorSection.classList.add('hidden');
+        if (locationSelector) locationSelector.classList.add('hidden');
+        if (loadingSection) loadingSection.classList.add('hidden');
+        if (resultSection) resultSection.classList.add('hidden');
+        if (errorSection) errorSection.classList.add('hidden');
     }
 
     retryLocation.onclick = (e) => {
