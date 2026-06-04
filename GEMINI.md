@@ -22,10 +22,10 @@ The project follows a **Local-First** strategy, building out the intelligence an
 *   **Stages:** Geocoding service, NASA POWER API integration, Data normalization.
 *   **Completion Condition:** Utility script returns real, structured climate JSON for any region.
 
-### Phase 3: AI Core & Reasoning (Inference Layer)
-*   **System Development Focus:** Designing the "Brain" and prompt architecture.
-*   **Stages:** Prompt template engineering (System/User), response schema validation, local LLM testing (optional).
-*   **Completion Condition:** Backend generates dynamic prompts based on real NASA data.
+### Phase 3: Multi-Agent Architecture (The Differentiator)
+*   **System Development Focus:** Moving from a simple prompt wrapper to a multi-agent orchestration framework.
+*   **Stages:** Implement Climatologist, Agronomist, and Orchestrator agent roles; define agent interaction protocols.
+*   **Completion Condition:** The backend orchestrates a multi-step conversation between agents to generate hyper-local recommendations based on NASA data.
 
 ### Phase 4: Knowledge Graph Integration (Contextual Intelligence Layer)
 *   **System Development Focus:** Integrating **Graphify** to manage "Dark Data" and research context.
@@ -37,19 +37,19 @@ The project follows a **Local-First** strategy, building out the intelligence an
 *   **Completion Condition:** The AI assessment includes a "Research Context" or "Citations" section derived from the graph query.
 
 ### Phase 5: Backend Orchestration & API (Integration Layer)
-*   **System Development Focus:** Connecting Data, Graph, and AI into a unified pipeline.
+*   **System Development Focus:** Connecting Data, Graph, and Agents into a unified pipeline.
 *   **Stages:** `/api/assess` route assembly, Error handling, Request/Response normalization.
-*   **Completion Condition:** A POST request executes the full workflow (Geocode -> NASA -> Graphify -> AI) and returns a complete assessment.
+*   **Completion Condition:** A POST request executes the full workflow (Geocode -> NASA -> Graphify -> Multi-Agent) and returns a complete assessment.
 
 ### Phase 6: Interactive Interface (Presentation Layer)
 *   **System Development Focus:** Creating the user-facing web application.
 *   **Stages:** Responsive HTML/CSS, Vanilla JS Controller, Visual risk indicators, result rendering.
 *   **Completion Condition:** User can input a city and see a formatted, evidence-backed drought report.
 
-### Phase 7: AMD Cloud & AI Integration (Scale Layer)
-*   **System Development Focus:** Moving inference to AMD MI300X via vLLM.
-*   **Stages:** Provisioning MI300X, deploying vLLM, switching to real `AMDInference` provider.
-*   **Completion Condition:** Real-time inference running on AMD hardware.
+### Phase 7: AMD Fine-Tuning & Deployment (The Moat)
+*   **System Development Focus:** Fine-tuning an open-source model on agricultural data and deploying to MI300X.
+*   **Stages:** Dataset curation, Fine-tuning process, Provisioning MI300X, deploying vLLM with the custom model.
+*   **Completion Condition:** Real-time multi-agent inference running on the custom fine-tuned model via AMD hardware.
 
 ### Phase 8: Production & Submission (Release Layer)
 *   **Stages:** Gunicorn setup, Deployment (Render/Railway), E2E Testing, Video/Deck creation.

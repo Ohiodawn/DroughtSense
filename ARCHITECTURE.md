@@ -1,6 +1,6 @@
 # 🏗 Architecture & Technical Documentation
 
-This document provides a technical deep-dive into the architecture of **DroughtSense AI**, explaining how the various components interact to deliver real-time agricultural intelligence.
+This document provides a technical deep-dive into the architecture of **DroughtSense AI**, highlighting our unique multi-agent workflow and fine-tuned model infrastructure.
 
 ---
 
@@ -11,21 +11,28 @@ graph TD
     A[User / Farmer] -->|Enters Region Name| B[Frontend UI HTML/JS]
     B -->|POST /api/assess {region}| C[Flask Backend]
     
-    subgraph Data Acquisition
+    subgraph Context Gathering
         C -->|1. Geocode Region| D[Geocoding Service]
-        D -->|Lat/Lon| C
         C -->|2. Fetch Climate Data| E[NASA POWER API]
-        E -->|Precipitation, Temp, Soil Moisture| C
+        C -->|3. Query Graph| F[Graphify Knowledge Graph]
     end
     
+    subgraph Multi-Agent Orchestration
+        C -->|4. Dispatch Context| G[Orchestrator Agent]
+        G -->|Climatology Task| H[Climatologist Agent]
+        H -->|Meteorological Risk| G
+        G -->|Agronomy Task| I[Agronomist Agent]
+        I -->|Crop Mitigations| G
+    end
+
     subgraph AI Inference / AMD Developer Cloud
-        C -->|3. Constructed Prompt| F[AMD MI300X Node]
-        F -->|vLLM Endpoint| G[Llama 3.1 Model]
-        G -->|Structured JSON Output| F
-        F -->|Response| C
+        H -.->|Inference Request| J[AMD MI300X Node]
+        I -.->|Inference Request| J
+        J -->|vLLM Endpoint| K[Fine-Tuned Llama 3.1]
     end
     
-    C -->|4. Parsed JSON Results| B
+    G -->|5. Synthesize JSON| C
+    C -->|6. Return Report| B
     B -->|Displays Risk & Recommendations| A
 ```
 
@@ -33,32 +40,16 @@ graph TD
 
 ## 🧩 Component Breakdown
 
-### 1. Frontend (Client Interface)
-- **Tech:** HTML5, CSS3, Vanilla JavaScript.
-- **Role:** Provides a lightweight, accessible interface. Crucial for users in regions with poor internet connectivity.
-- **Flow:** 
-  - Captures the user's target region.
-  - Sends an asynchronous `POST` request to the backend.
-  - Displays a loading state while external APIs and AI inference run.
-  - Renders the resulting JSON payload (Risk Level, Explanation, Recommendations) dynamically into the DOM.
+### 1. Multi-Agent Workflow (The Differentiator)
+Instead of a single zero-shot prompt, the system employs a multi-agent framework:
+- **Climatologist Agent:** Interprets NASA data and Graphify context to calculate precise meteorological risk.
+- **Agronomist Agent:** Uses the Climatologist's output to generate hyper-local, actionable farming recommendations.
+- **Orchestrator Agent:** Manages the flow and ensures the final output strictly adheres to the required JSON schema.
 
-### 2. Backend Server (Application Logic)
-- **Tech:** Python, Flask, `requests`.
-- **Role:** Acts as the central orchestrator (The "Agent"). It handles data fetching, data formatting, and communication with the AI model.
-- **Flow:**
-  - **Geocoding:** Converts the user's string input (e.g., "Nairobi, Kenya") into latitude and longitude coordinates.
-  - **NASA POWER API Call:** Uses the coordinates to query the NASA Prediction Of Worldwide Energy Resources (POWER) API. We request recent agroclimatology data (e.g., last 30-60 days of precipitation, average temperature, and soil moisture).
-  - **Prompt Assembly:** The backend aggregates this data and injects it into a strict System/User prompt template.
-  - **Error Handling:** Catches API timeouts or missing data and returns graceful fallbacks to the frontend.
-
-### 3. AI Inference Backend (AMD Infrastructure)
+### 2. AI Inference (The Moat)
 - **Tech:** AMD Developer Cloud, MI300X GPU, ROCm, vLLM.
-- **Model:** Meta Llama 3.1 8B Instruct (or equivalent Qwen2.5 open-source model).
-- **Role:** Analyzes the numerical climate data and applies agricultural reasoning to output a risk assessment.
-- **Why vLLM on MI300X?** 
-  - **High Throughput:** vLLM optimizes memory management (PagedAttention), allowing the MI300X to serve requests extremely fast.
-  - **OpenAI Compatibility:** The vLLM server exposes an OpenAI-compatible REST API (`/v1/chat/completions`). This allows us to use standard Python `openai` libraries in our Flask backend, simply by overriding the `base_url`.
-  - **Data Sovereignty:** By hosting the model ourselves on AMD infrastructure, regional agricultural vulnerability data is not shared with proprietary Big Tech APIs.
+- **Model:** A **Custom Fine-Tuned** Meta Llama 3.1 8B Instruct model.
+- **Why Fine-Tuning?** General models (like ChatGPT) provide generic advice. By fine-tuning the model on agricultural papers, regional crop vulnerability datasets, and drought mitigation tactics, our model possesses hyper-specific domain knowledge.
 
 ---
 
