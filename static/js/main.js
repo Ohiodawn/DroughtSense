@@ -22,8 +22,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const recommendationsList = document.getElementById('recommendationsList');
     const citationsSection = document.getElementById('citationsSection');
     const citationsText = document.getElementById('citationsText');
-    
     const errorSection = document.getElementById('error');
+
+    let trendsChart = null;
 
     // Handle initial form submission (Geocoding Step)
     assessForm.addEventListener('submit', async (e) => {
@@ -148,6 +149,11 @@ document.addEventListener('DOMContentLoaded', () => {
         riskBadge.textContent = `${assessment.risk_level} Risk`;
         riskBadge.className = 'badge ' + assessment.risk_level.toLowerCase();
         
+        // Render Trends Chart
+        if (climate_data.daily_series) {
+            renderTrends(climate_data.daily_series);
+        }
+
         // Recommendations
         recommendationsList.innerHTML = '';
         assessment.recommendations.forEach(rec => {
@@ -166,6 +172,66 @@ document.addEventListener('DOMContentLoaded', () => {
 
         resultSection.classList.remove('hidden');
         resultSection.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function renderTrends(series) {
+        const ctx = document.getElementById('trendsChart').getContext('2d');
+        
+        if (trendsChart) {
+            trendsChart.destroy();
+        }
+
+        const labels = series.dates.map(d => {
+            const m = d.substring(4, 6);
+            const day = d.substring(6, 8);
+            return `${m}/${day}`;
+        });
+
+        trendsChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Rainfall (mm)',
+                        data: series.precip,
+                        borderColor: '#2e7d32',
+                        backgroundColor: 'rgba(46, 125, 50, 0.1)',
+                        borderWidth: 2,
+                        yAxisID: 'y',
+                        fill: true,
+                        tension: 0.3
+                    },
+                    {
+                        label: 'Temp (°C)',
+                        data: series.temp,
+                        borderColor: '#f44336',
+                        borderWidth: 2,
+                        yAxisID: 'y1',
+                        tension: 0.3
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        title: { display: true, text: 'Rainfall (mm)' }
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        grid: { drawOnChartArea: false },
+                        title: { display: true, text: 'Temp (°C)' }
+                    }
+                }
+            }
+        });
     }
 
     function showError(msg) {

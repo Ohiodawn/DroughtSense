@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
+- **Agentic Process Visibility:** Added a terminal-style log to the loading UI to show real-time multi-agent coordination (Climatologist, Agronomist, Synthesizer).
+- **Climate Trend Visualization:** Integrated `Chart.js` to visualize 30-day precipitation and temperature trends.
+- Updated `services/nasa_service.py` to return daily time-series data alongside summarized averages.
+- Added interactive line charts to the dashboard for enhanced visual evidence.
 - **Robust Location Resolution System:** Complete overhaul of the geocoding pipeline to ensure geospatial accuracy.
 - Created `services/location_utils.py` for coordinate sanity checks, bounding box centroid calculation, and ocean zone rejection.
 - Implemented a **Location Confirmation Step** in the UI with a Multiple Match Selector for ambiguous inputs.

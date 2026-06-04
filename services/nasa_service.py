@@ -5,7 +5,7 @@ from services.location_utils import get_offset_points
 def fetch_climate_data(lat, lon, average_radius=False):
     """
     Fetches climate data from NASA POWER API.
-    If average_radius is True, fetches 5 points and averages them.
+    Returns both summarized averages and raw daily series for trends.
     """
     
     def fetch_point(p_lat, p_lon):
@@ -27,20 +27,26 @@ def fetch_climate_data(lat, lon, average_radius=False):
             
             features = data['properties']['parameter']
             
-            def get_valid_values(feature_dict):
-                return [v for v in feature_dict.values() if v is not None and v > -900]
+            def get_valid_series(feature_dict):
+                return {k: v for k, v in feature_dict.items() if v is not None and v > -900}
 
-            temp_vals = get_valid_values(features['T2M'])
-            precip_vals = get_valid_values(features['PRECTOTCORR'])
-            soil_vals = get_valid_values(features['GWETROOT'])
+            temp_series = get_valid_series(features['T2M'])
+            precip_series = get_valid_series(features['PRECTOTCORR'])
+            soil_series = get_valid_series(features['GWETROOT'])
             
-            if not temp_vals or not precip_vals or not soil_vals:
+            if not temp_series or not precip_series or not soil_series:
                 return None
 
             return {
-                "temperature": sum(temp_vals) / len(temp_vals),
-                "precipitation": sum(precip_vals),
-                "soil_moisture": sum(soil_vals) / len(soil_vals)
+                "avg_temp": sum(temp_series.values()) / len(temp_series),
+                "total_precip": sum(precip_series.values()),
+                "avg_soil": sum(soil_series.values()) / len(soil_series),
+                "series": {
+                    "dates": list(temp_series.keys()),
+                    "temp": list(temp_series.values()),
+                    "precip": list(precip_series.values()),
+                    "soil": list(soil_series.values())
+                }
             }
         except Exception as e:
             print(f"NASA API error at ({p_lat}, {p_lon}): {e}")
@@ -51,23 +57,27 @@ def fetch_climate_data(lat, lon, average_radius=False):
     if average_radius:
         points.extend(get_offset_points(lat, lon))
 
-    results = []
+    point_results = []
     for p_lat, p_lon in points:
         res = fetch_point(p_lat, p_lon)
         if res:
-            results.append(res)
+            point_results.append(res)
 
-    if not results:
+    if not point_results:
         return None
 
-    # Average the results
-    avg_temp = sum(r['temperature'] for r in results) / len(results)
-    avg_precip = sum(r['precipitation'] for r in results) / len(results)
-    avg_soil = sum(r['soil_moisture'] for r in results) / len(results)
+    # Summarize results
+    avg_temp = sum(r['avg_temp'] for r in point_results) / len(point_results)
+    avg_precip = sum(r['total_precip'] for r in point_results) / len(point_results)
+    avg_soil = sum(r['avg_soil'] for r in point_results) / len(point_results)
+
+    # Use the center point (first result) for the visual series
+    main_series = point_results[0]['series']
 
     return {
         "temperature": round(avg_temp, 2),
         "precipitation": round(avg_precip, 2),
         "soil_moisture": round(avg_soil, 3),
-        "points_averaged": len(results)
+        "points_averaged": len(point_results),
+        "daily_series": main_series
     }

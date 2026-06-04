@@ -90,7 +90,12 @@ def assess():
     
     return jsonify({
         "location": location,
-        "climate_data": climate_data,
+        "climate_data": {
+            "temperature": climate_data['temperature'],
+            "precipitation": climate_data['precipitation'],
+            "soil_moisture": climate_data['soil_moisture'],
+            "daily_series": climate_data.get('daily_series')
+        },
         "assessment": result['assessment'],
         "agent_logs": result['agent_logs']
     })
