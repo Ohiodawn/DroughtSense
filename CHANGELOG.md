@@ -6,7 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
-- **Phase 3 Complete:** Implemented a sophisticated **Multi-Agent Orchestration** workflow in `services/ai_service.py`, moving from single-shot prompts to specialized roles (Climatologist, Agronomist, Synthesizer).
+- **Robust Location Resolution System:** Complete overhaul of the geocoding pipeline to ensure geospatial accuracy.
+- Created `services/location_utils.py` for coordinate sanity checks, bounding box centroid calculation, and ocean zone rejection.
+- Implemented a **Location Confirmation Step** in the UI with a Multiple Match Selector for ambiguous inputs.
+- Implemented **NASA POWER Radius Averaging** (5-point average) for large administrative regions to provide more representative climate data.
+- Added automated robustness tests in `tests/test_location_robustness.py`.
+- **Phase 3 Complete:** Implemented a sophisticated **Multi-Agent Orchestration** workflow.
 - **Fine-Tuning Architecture:** Integrated the comprehensive AMD-accelerated Fine-Tuning phase into the project roadmap.
 - Created `fine_tuning/` directory containing the full training pipeline:
   - `prepare_dataset.py`: Script to curate agricultural datasets from Hugging Face (CGIAR, Agri-LLM, etc.) into a Q&A format.
