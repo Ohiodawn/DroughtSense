@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
+- **API Testing:** Created `tests/test_api.py` verifying the full data-to-mock-AI pipeline.
 - **llama.cpp Integration:** Added `LlamaCppProvider` to `services/ai_service.py` to support inference via local llama.cpp servers.
 - Refactored local provider selection to use `LOCAL_AI_PROVIDER` environment variable (supporting `ollama`, `llama.cpp`, and `mock`).
 - **Local LLM Integration:** Added `OllamaProvider` to `services/ai_service.py`.
