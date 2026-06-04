@@ -12,12 +12,17 @@ class GraphService:
         graph_path = os.path.join(os.getcwd(), 'graphify-out', 'graph.json')
         
         if not os.path.exists(graph_path):
-            print("Knowledge graph not found. Skipping graph retrieval.")
+            print("INFO: Knowledge graph not found. Skipping graph retrieval.")
             return ""
             
         try:
-            # Use the graphify CLI to query the local graph
-            # graphify query "<question>" --budget 1000
+            # Check if graphify is installed in PATH
+            # Use 'which' or 'where' depending on OS to be extra safe
+            import shutil
+            if not shutil.which('graphify'):
+                print("WARN: 'graphify' CLI tool not found in system PATH.")
+                return ""
+
             result = subprocess.run(
                 ['graphify', 'query', question, '--budget', '1000'],
                 capture_output=True,
@@ -25,8 +30,11 @@ class GraphService:
                 check=True
             )
             return result.stdout.strip()
+        except subprocess.CalledProcessError as e:
+            print(f"ERROR: Graphify query failed: {e}")
+            return ""
         except Exception as e:
-            print(f"Error querying knowledge graph: {e}")
+            print(f"ERROR: Unexpected graph error: {e}")
             return ""
 
     @staticmethod

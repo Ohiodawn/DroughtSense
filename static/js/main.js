@@ -154,6 +154,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
             if (!response.ok) throw new Error(data.error || 'ANALYSIS_FAILED');
 
+            // Set state immediately for PDF/export functionality
+            lastResult = data;
+
             await showAgentLogs(data.agent_logs);
             displayResults(data);
         } catch (err) {
@@ -179,7 +182,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function displayResults(data) {
-        lastResult = data;
         const { location, climate_data, assessment } = data;
         
         resolvedLocation.textContent = `RESOLVED_ID: ${location.display_name}`;
