@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
+- **UI/UX Overhaul:** Implemented a modern "Nature-Tech" design system with a sidebar layout, enhanced typography, and micro-interactions.
+- **Input Enforcement:** Restricted location inputs to English (Latin) characters only to ensure compatibility across all downstream APIs and services.
+- Updated `location_utils.py` and `app.py` with refined regex sanitization.
+- Added frontend validation and user feedback for non-English character inputs.
 - **PDF Report Generation:** Added a professional 'Download PDF Report' feature for farmers to share assessments with institutions.
 - Created `services/pdf_service.py` using `fpdf2` with custom branding and formatted results.
 - Added a new `/api/report` endpoint and UI download button.

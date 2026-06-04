@@ -24,11 +24,13 @@ from services.ai_service import AMDInference
 def sanitize_region(region):
     """
     Cleans and validates the region input string.
+    Restricts to English (Latin) characters for system stability.
     """
     if not region:
         return None
     cleaned = bleach.clean(region, tags=[], strip=True)
-    cleaned = re.sub(r'[^\w\s,\-]', '', cleaned)
+    # Allows only English alphanumeric, spaces, commas, and hyphens
+    cleaned = re.sub(r'[^a-zA-Z0-9\s,\-]', '', cleaned)
     return cleaned.strip()[:100]
 
 @cache.memoize(timeout=86400)

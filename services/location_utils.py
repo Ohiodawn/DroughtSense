@@ -3,12 +3,13 @@ import re
 def clean_query(query):
     """
     Strips special characters and extra whitespace from the user input.
-    Replaces non-alphanumeric (except comma/hyphen) with spaces to preserve word breaks.
+    Enforces English-only (Latin) characters to ensure compatibility.
     """
     if not query:
         return ""
-    # Replace non-alphanumeric (excluding , and -) with space
-    cleaned = re.sub(r'[^\w\s,\-]', ' ', query)
+    # Remove non-English (Latin) characters and non-standard symbols
+    # Allows: a-z, A-Z, 0-9, space, comma, hyphen
+    cleaned = re.sub(r'[^a-zA-Z0-9\s,\-]', ' ', query)
     # Collapse multiple spaces and trim
     return " ".join(cleaned.split())
 

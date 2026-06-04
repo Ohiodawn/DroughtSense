@@ -67,6 +67,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const region = regionInput.value.trim();
         if (!region) return;
 
+        // English (Latin) characters only validation
+        const englishOnly = region.replace(/[^a-zA-Z0-9\s,\-]/g, "");
+        if (englishOnly.length !== region.length || region.length < 2) {
+            showError("Please use English characters only (at least 2 characters).");
+            return;
+        }
+
         hideAll();
         loadingSection.classList.remove('hidden');
         loadingStatus.textContent = "Locating agricultural region...";
