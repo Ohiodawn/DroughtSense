@@ -55,13 +55,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function updateMap(lat, lon, name) {
+    function updateMap(lat, lon, name, isLarge) {
         initMap();
         if (!map) return;
         
         try {
             const coords = [lat, lon];
-            map.setView(coords, 9);
+            // Adaptive zoom: Cities (11), Large States/Provinces (6)
+            const zoom = isLarge ? 6 : 11;
+            map.setView(coords, zoom);
             
             if (marker) {
                 marker.setLatLng(coords).setPopupContent(name);
@@ -191,7 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
             largeRegionWarning.classList.add('hidden');
         }
 
-        updateMap(location.lat, location.lon, location.name);
+        updateMap(location.lat, location.lon, location.name, location.is_large);
 
         resultRegion.textContent = location.name;
         explanationText.textContent = assessment.explanation;

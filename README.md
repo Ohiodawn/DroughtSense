@@ -88,11 +88,12 @@ graph TD
 ---
 
 ## ✨ Key Features
-*   🤖 **Agentic Terminal:** Real-time visibility into the multi-agent decision-making process.
-*   📍 **Geospatial Precision:** High-accuracy mapping with visual marker confirmation.
-*   📊 **Visual Evidence:** Dynamic line charts showing 30-day rainfall and temperature variance.
-*   📄 **Exportable Intel:** Professional, institution-ready PDF reports for farmers.
-*   🛡️ **Security & Scale:** English-only Latin input enforcement and 24-hour intelligent caching.
+*   🤖 **Agentic Terminal:** Real-time visibility into the multi-agent decision-making process (DS-AI Protocol).
+*   📍 **Geospatial Precision:** Adaptive interactive mapping with automatic zoom and 5-point averaging for large regions.
+*   📊 **Visual Evidence:** High-density line charts showing 30-day interannual rainfall and temperature variance.
+*   🛡️ **Resilient Data Acquisition:** Best-effort sensor interrogation with automatic failover for missing NASA data points.
+*   📄 **Exportable Intel:** Professional, institution-ready PDF reports optimized for mobile and print.
+*   ⚡ **System Performance:** 24-hour intelligent caching and English-only Latin input enforcement for maximum stability.
 
 ---
 

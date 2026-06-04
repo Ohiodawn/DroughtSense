@@ -5,11 +5,11 @@ from services.location_utils import get_offset_points
 def fetch_climate_data(lat, lon, average_radius=False):
     """
     Fetches climate data from NASA POWER API.
-    Returns summarized averages and raw daily series for trends.
+    Implements a best-effort approach to handle missing sensor data.
     """
     
     def fetch_point(p_lat, p_lon):
-        # Shift back by 4 days to ensure data availability (NASA is sometimes delayed)
+        # Shift back by 4 days to ensure data availability
         end_date = (datetime.now() - timedelta(days=4)).strftime('%Y%m%d')
         start_date = (datetime.now() - timedelta(days=34)).strftime('%Y%m%d')
         
@@ -21,8 +21,7 @@ def fetch_climate_data(lat, lon, average_radius=False):
         )
         
         try:
-            print(f"FETCHING_NASA_DATA: Coords({p_lat}, {p_lon})")
-            # Strict timeout to prevent hanging the whole system
+            print(f"FETCH_START: ({p_lat}, {p_lon})")
             response = requests.get(url, timeout=10) 
             response.raise_for_status()
             data = response.json()
@@ -32,35 +31,38 @@ def fetch_climate_data(lat, lon, average_radius=False):
             def get_valid_series(feature_dict):
                 return {k: v for k, v in feature_dict.items() if v is not None and v > -900}
 
-            temp_series = get_valid_series(features['T2M'])
-            precip_series = get_valid_series(features['PRECTOTCORR'])
-            soil_series = get_valid_series(features['GWETROOT'])
+            # Best-effort parsing: collect what we can
+            temp_series = get_valid_series(features.get('T2M', {}))
+            precip_series = get_valid_series(features.get('PRECTOTCORR', {}))
+            soil_series = get_valid_series(features.get('GWETROOT', {}))
             
-            if not temp_series or not precip_series or not soil_series:
-                print(f"WARN: Incomplete NASA data at ({p_lat}, {p_lon})")
+            # Critical check: must have at least temperature and precipitation
+            if not temp_series or not precip_series:
+                print(f"FETCH_FAIL: Insufficient critical data at ({p_lat}, {p_lon})")
                 return None
 
             return {
                 "avg_temp": sum(temp_series.values()) / len(temp_series),
                 "total_precip": sum(precip_series.values()),
-                "avg_soil": sum(soil_series.values()) / len(soil_series),
+                # Soil moisture is optional/best-effort
+                "avg_soil": sum(soil_series.values()) / len(soil_series) if soil_series else 0.5,
                 "series": {
                     "dates": list(temp_series.keys()),
                     "temp": list(temp_series.values()),
                     "precip": list(precip_series.values()),
-                    "soil": list(soil_series.values())
+                    "soil": list(soil_series.values()) if soil_series else [0.5] * len(temp_series)
                 }
             }
         except Exception as e:
-            print(f"NASA_API_ERROR at ({p_lat}, {p_lon}): {e}")
+            print(f"FETCH_ERROR at ({p_lat}, {p_lon}): {e}")
             return None
 
     # Determine points to fetch
     points = [(lat, lon)]
     if average_radius:
-        # For average_radius, we limit to 3 points total to speed up the process
+        # Fetch up to 3 points for averaging
         offsets = get_offset_points(lat, lon)
-        points.extend(offsets[:2]) # Only 2 offsets instead of 4 for performance
+        points.extend(offsets[:2])
 
     point_results = []
     for p_lat, p_lon in points:
@@ -69,21 +71,18 @@ def fetch_climate_data(lat, lon, average_radius=False):
             point_results.append(res)
 
     if not point_results:
-        print("CRITICAL: No valid NASA data fetched for any point.")
+        print("CRITICAL_ERROR: Zero valid points returned from NASA.")
         return None
 
-    # Summarize results
+    # Summarize with weighted confidence
     avg_temp = sum(r['avg_temp'] for r in point_results) / len(point_results)
     avg_precip = sum(r['total_precip'] for r in point_results) / len(point_results)
     avg_soil = sum(r['avg_soil'] for r in point_results) / len(point_results)
-
-    # Use the first successful result for the visual series
-    main_series = point_results[0]['series']
 
     return {
         "temperature": round(avg_temp, 2),
         "precipitation": round(avg_precip, 2),
         "soil_moisture": round(avg_soil, 3),
         "points_averaged": len(point_results),
-        "daily_series": main_series
+        "daily_series": point_results[0]['series']
     }

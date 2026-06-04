@@ -20,7 +20,9 @@ class AIProvider:
         return None, "mock"
 
     @staticmethod
-    def call(messages, model="llama-3.1-8b-instruct"):
+    def call(messages):
+        # Allow dynamic model selection via env var, default to qwen-7b
+        model = os.getenv('AMD_MODEL_ID', 'qwen2.5-7b-instruct')
         client, provider_name = AIProvider.get_client()
         
         if provider_name == "mock":
