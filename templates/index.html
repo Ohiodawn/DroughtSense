@@ -32,7 +32,10 @@
 
             <section id="loading" class="hidden">
                 <div class="spinner"></div>
-                <p>Fetching climate data and generating AI assessment...</p>
+                <p id="loadingStatus">Fetching climate data...</p>
+                <div id="agentLogs" class="agent-logs">
+                    <!-- Agent logs will be streamed here -->
+                </div>
             </section>
 
             <section id="result" class="hidden">

@@ -72,16 +72,18 @@ def assess():
     climate_data['region'] = region
     
     # 3. Use AI (Phase 5: Real AMD Inference if configured)
-    assessment = AMDInference.assess_drought(climate_data)
+    # The result now comes from the Multi-Agent Orchestrator
+    result = AMDInference.assess_drought(climate_data)
     
-    # Return both climate data and assessment
+    # Return climate data, assessment, and agent reports for UI visibility
     return jsonify({
         "climate_data": {
             "temperature": climate_data['temperature'],
             "precipitation": climate_data['precipitation'],
             "soil_moisture": climate_data['soil_moisture']
         },
-        "assessment": assessment
+        "assessment": result['assessment'],
+        "agent_logs": result['agent_logs']
     })
 
 if __name__ == '__main__':

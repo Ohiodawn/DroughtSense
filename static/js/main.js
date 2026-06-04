@@ -4,15 +4,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const submitBtn = document.getElementById('submitBtn');
     
     const loadingSection = document.getElementById('loading');
+    const loadingStatus = document.getElementById('loadingStatus');
+    const agentLogs = document.getElementById('agentLogs');
     const resultSection = document.getElementById('result');
     const errorSection = document.getElementById('error');
-    
-    const resultRegion = document.getElementById('resultRegion');
-    const riskBadge = document.getElementById('riskBadge');
-    const explanationText = document.getElementById('explanationText');
-    const recommendationsList = document.getElementById('recommendationsList');
-    const citationsSection = document.getElementById('citationsSection');
-    const citationsText = document.getElementById('citationsText');
 
     assessForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -31,6 +26,8 @@ document.addEventListener('DOMContentLoaded', () => {
         resultSection.classList.add('hidden');
         errorSection.classList.add('hidden');
         loadingSection.classList.remove('hidden');
+        agentLogs.innerHTML = '';
+        loadingStatus.textContent = "Connecting to NASA POWER API...";
         submitBtn.disabled = true;
 
         try {
@@ -48,6 +45,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(data.error || 'Failed to generate assessment');
             }
 
+            // Simulate Agent Thinking for UX/Hackathon visibility
+            await showAgentLogs(data.agent_logs);
+
             // Display Results
             displayResults(region, data);
 
@@ -60,6 +60,18 @@ document.addEventListener('DOMContentLoaded', () => {
             submitBtn.disabled = false;
         }
     });
+
+    async function showAgentLogs(logs) {
+        for (const log of logs) {
+            loadingStatus.textContent = log.status;
+            const logEl = document.createElement('div');
+            logEl.className = 'log-entry';
+            logEl.innerHTML = `> [${log.agent}] ${log.status}`;
+            agentLogs.appendChild(logEl);
+            // Artificial delay to show the process
+            await new Promise(resolve => setTimeout(resolve, 1500));
+        }
+    }
 
     function displayResults(region, data) {
         const { climate_data, assessment } = data;

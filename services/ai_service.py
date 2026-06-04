@@ -163,10 +163,7 @@ class AIAgentOrchestrator:
     @staticmethod
     def assess_drought(region_data):
         """
-        Executes the multi-agent workflow:
-        1. Context -> Climatologist
-        2. Climatologist -> Agronomist
-        3. Both -> Synthesizer -> Final JSON
+        Executes the multi-agent workflow and returns both final JSON and agent logs.
         """
         region = region_data.get('region')
         graph_context = GraphService.get_drought_context()
@@ -178,7 +175,16 @@ class AIAgentOrchestrator:
         agronomy_report = AgronomistAgent.advise(region, climatology_report)
         
         # Agent 3: Synthesis
-        return SynthesizerAgent.finalize(climatology_report, agronomy_report, graph_context)
+        final_json = SynthesizerAgent.finalize(climatology_report, agronomy_report, graph_context)
+
+        return {
+            "assessment": final_json,
+            "agent_logs": [
+                {"agent": "Climatologist", "status": "Analyzing weather patterns...", "report": climatology_report},
+                {"agent": "Agronomist", "status": "Devising crop strategies...", "report": agronomy_report},
+                {"agent": "Synthesizer", "status": "Finalizing report...", "report": "Consolidated climatology and agronomy insights."}
+            ]
+        }
 
 # ==========================================
 # 4. MOCK FALLBACK (FOR SAFETY/DEV)

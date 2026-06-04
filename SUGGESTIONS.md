@@ -20,7 +20,8 @@ This file tracks potential improvements, optimizations, and feature ideas for Dr
 | 003 | [Current Date] | *Graphify Integration* | *Use Knowledge Graphs to connect climate data with scientific research papers and regional policies.* | ✅ `Completed` | *Infrastructure logic implemented.* |
 | 004 | [Current Date] | *Input Sanitization & Validation* | *Ensure the region input is sanitized on the frontend and backend to prevent XSS or injection.* | ✅ `Completed` | *Implemented via bleach and regex.* |
 | 005 | [Current Date] | *Automated Unit Testing* | *Add Python unit tests for the Geocoding and NASA services to ensure reliability.* | ✅ `Completed` | *Added pytest suite with requests-mock.* |
-| 007 | [Current Date] | *Multi-Agent Architecture* | *Refactor the AI service to use specialized personas (Climatologist, Agronomist) collaborating to form the final report.* | 🟢 `Approved` | *Critical differentiator. Assigned to Phase 3.* |
+| 007 | [Current Date] | *Multi-Agent Architecture* | *Refactor the AI service to use specialized personas (Climatologist, Agronomist) collaborating to form the final report.* | ✅ `Completed` | *Implemented Climatologist, Agronomist, and Synthesizer agents.* |
 | 008 | [Current Date] | *Agricultural Fine-Tuning* | *Curate a specialized dataset (crop tolerances, drought mitigation tactics) to fine-tune Llama 3.1 before deploying to AMD MI300X.* | 🟢 `Approved` | *Creates a strong "moat" against generic LLMs. Assigned to Phase 7.* |
+| 009 | [Current Date] | *Agentic Process Visibility (UI)* | *Show 'Agent logs' in the UI (e.g., 'Climatologist is analyzing rainfall patterns...') to make the multi-agent workflow visible to users and judges.* | ✅ `Completed` | *Added terminal-style logs to the loading UI.* |
 
 *(New suggestions will be added below)*
