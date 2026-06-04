@@ -17,7 +17,7 @@
 [![Deployment Status](https://img.shields.io/badge/Deployment-Live-success.svg)](https://droughtsense-ai.railway.app)
 [![Pytest Passing](https://img.shields.io/badge/Tests-Passing-brightgreen.svg)](https://github.com/Ohiodawn/DroughtSense/actions)
 
-**DroughtSense AI is a hyper-local, multi-agent reasoning system that transforms live NASA climate data into actionable agricultural intelligence using an end-to-end open-source stack running exclusively on AMD hardware.**
+**DroughtSense AI is a professional multi-agent reasoning system that transforms live NASA climate data into actionable agricultural intelligence using a custom 7B model fine-tuned on the AMD Instinct™ MI300X.**
 
 ---
 
@@ -25,22 +25,22 @@
 
 [![View Live Application](https://img.shields.io/badge/View_Live_Application-Click_Here-0b0d0e?style=for-the-badge&logo=railway)](https://droughtsense-ai.railway.app)
 
-*The dashboard provides a real-time 5-point climate average, interactive 30-day trends, and agentic reasoning grounded in scientific research.*
+*The dashboard features a hyper-local 5-point climate average, interactive 30-day trends, a live Leaflet.js map, and agentic reasoning grounded in 45,000+ scientific publications.*
 
 ---
 
 ## 🌾 The Problem
-Droughts are the single most devastating climate event for global food security, accounting for over **80% of total crop losses** in developing nations. Existing digital tools fail because they are either too technical, lack local environmental context, or rely on expensive, closed-source LLMs that haven't seen specialized agricultural research.
+Droughts are the single most devastating climate event for global food security, accounting for over **80% of total crop losses** in developing nations. Existing tools fail small farmers because they are either too technical, lack local environmental context, or rely on generic, closed-source LLMs that haven't been trained on specialized agricultural science.
 
 ---
 
 ## 🧠 The Solution
-DroughtSense AI bridges the gap between raw scientific data and farm-level action by leveraging an **AMD-exclusive AI infrastructure**.
+DroughtSense AI bridges the gap between raw scientific data and farm-level action by leveraging an **exclusive AMD AI infrastructure**.
 
-*   **Real Data:** Live, 30-day agroclimatology stats from NASA's POWER API.
-*   **The Moat (DroughtSense-Qwen):** A unique model fine-tuned on **45,000+ agricultural research documents** using the AMD MI300X.
-*   **Data Sovereignty:** By hosting our own fine-tuned model on private AMD infrastructure, sensitive regional food security data stays out of proprietary third-party APIs.
-*   **Agentic Reasoning:** Specialized AI personas (Climatologists and Agronomists) collaborate on the MI300X to ensure assessments are scientifically sound and practically useful.
+*   **Real Data:** Live, 30-day agroclimatology stats (Precip, Temp, Soil) from **NASA's POWER API**.
+*   **The Moat: DroughtSense-7B:** A custom model specifically fine-tuned on **45,000+ CGIAR research publications** using the AMD MI300X.
+*   **Agentic Reasoning:** A collaborative workflow where specialized **Climatologist** and **Agronomist** agents perform deep analysis on the MI300X.
+*   **Data Sovereignty:** By hosting our own model on private AMD hardware, sensitive food security data remains secure and independent of proprietary third-party APIs.
 
 ---
 
@@ -50,40 +50,36 @@ DroughtSense AI bridges the gap between raw scientific data and farm-level actio
 graph TD
     User[User Browser] -->|POST /api/assess| Flask[Flask App on Railway]
     
-    subgraph Data Acquisition
-        Flask -->|1. Geocode| Nominatim[Nominatim / Google Maps]
+    subgraph Context Gathering
+        Flask -->|1. Geocode| Geo[Nominatim / Google Maps]
         Flask -->|2. Fetch Stats| NASA[NASA POWER API]
-        NASA -->|Precip, Temp, Soil| Flask
-    end
-    
-    subgraph Context Layer
         Flask -->|3. Query Graph| Graphify[Graphify Knowledge Graph]
-        Graphify -->|Scientific Context| Flask
     end
 
-    subgraph Agentic Reasoning on AMD MI300X
+    subgraph Multi-Agent Orchestration on AMD MI300X
         Flask -->|4. Dispatch| Orchestrator[Orchestrator Agent]
-        Orchestrator -->|Climatology Task| Climatologist[Climatologist Agent]
-        Orchestrator -->|Agronomy Task| Agronomist[Agronomist Agent]
+        Orchestrator -->|Analyze Context| Climatologist[Climatologist Agent]
+        Orchestrator -->|Devise Strategy| Agronomist[Agronomist Agent]
         Climatologist -.->|vLLM Request| MI300X[AMD MI300X Node]
         Agronomist -.->|vLLM Request| MI300X
-        MI300X -->|Fine-Tuned Response| Orchestrator
+        MI300X -->|Fine-Tuned Qwen-7B| Orchestrator
     end
     
-    Orchestrator -->|5. Final JSON| Flask
-    Flask -->|6. Result UI| User
+    Orchestrator -->|5. Final Report| Flask
+    Flask -->|6. Visual Dashboard| User
 ```
 
 ---
 
 ## ✨ Features
 *   📡 **Live Climate Data:** Real-time retrieval of Precipitation, Temperature, and Soil Moisture via NASA POWER API.
-*   🤖 **Multi-Agent Coordination:** Orchestrated workflow between specialized scientific agent personas.
-*   🧠 **Custom Fine-Tuning:** Powered by `DroughtSense-Qwen`, a specialized model trained on AMD MI300X using LoRA.
-*   📍 **Geospatial Precision:** 5-point radius averaging for large regions ensuring hyper-local accuracy.
-*   📖 **Scientific Citations:** Transparent reasoning using the Graphify Knowledge Graph to cite research sources.
-*   ⚡ **High Performance:** 24-hour intelligent data caching and AMD-accelerated inference.
-*   📄 **Portable Reports:** Professional PDF generation for sharing with banks or aid agencies.
+*   🤖 **Multi-Agent Coordination:** Real-time terminal-style logs showing the collaboration between Climatologist and Agronomist agents.
+*   🧠 **Custom 7B Fine-Tuning:** Powered by `DroughtSense-7B`, a specialized Qwen 2.5 model optimized for agricultural reasoning.
+*   📍 **Interactive Mapping:** Visual location confirmation using **Leaflet.js** and high-accuracy **Google Maps** geocoding.
+*   📊 **30-Day Trend Charts:** Interactive **Chart.js** visualizations of rainfall and temperature patterns.
+*   📖 **Scientific Citations:** Transparent reasoning using the **Graphify** Knowledge Graph to cite scientific sources.
+*   📄 **Portable Reports:** Downloadable, branded **PDF reports** for farmers to share with banks or aid agencies.
+*   ⚡ **Production Hardened:** 24-hour intelligent caching, input sanitization, and 100% `pytest` pass rate.
 
 ---
 
@@ -93,41 +89,31 @@ graph TD
 |---|---|
 | **AI Hardware** | AMD Instinct™ MI300X GPU |
 | **AI Runtime** | AMD ROCm™ 6.x |
-| **Model Serving** | vLLM (OpenAI-compatible endpoint) |
-| **Base Model** | Qwen 2.5 1.5B Instruct |
-| **Fine-Tuned Model** | **DroughtSense-Qwen** (Custom LoRA Adapter) |
-| **Knowledge Graph** | **Graphify** (Extracted via AMD Backend) |
-| **Backend** | Python / Flask |
-| **Frontend** | HTML5 / CSS3 / Vanilla JavaScript |
-| **Climate Data** | NASA POWER API |
+| **Model Serving** | vLLM (OpenAI-compatible) |
+| **Base Model** | Qwen 2.5 **7B** Instruct |
+| **Fine-Tuned Model** | **DroughtSense-7B** (Custom LoRA Adapter) |
+| **Knowledge Graph** | **Graphify** (Context Retrieval) |
+| **Backend** | Python / Flask / Flask-Caching |
+| **Frontend** | HTML5 / CSS3 / Vanilla JS / Chart.js / Leaflet.js |
+| **Data APIs** | NASA POWER API / Google Maps / Nominatim |
+| **Reporting** | fpdf2 (PDF Generation) |
 | **Hosting** | Railway.app |
-| **License** | MIT License |
+| **Testing** | Pytest / Requests-Mock |
 
 ---
 
 ## 🧪 Fine-Tuning Details
 
-**DroughtSense-Qwen** was created to prove the power of private, specialized AI on AMD hardware.
+**DroughtSense-7B** represents the core intelligence of our system, specialized for agricultural risk.
 
-*   **Hardware:** AMD MI300X Accelerator.
-*   **Method:** LoRA (Low-Rank Adaptation) via PEFT.
-*   **Datasets:** CGIAR Gardian Publications, Agri-LLM corpus, and Crop Optimization Q&A.
-*   **Performance:** Trained in under **5 minutes** on the MI300X with native ROCm support.
-
----
-
-## 🧬 Knowledge Graph Extraction (AMD-Only)
-
-Unlike standard RAG, we use our **AMD-hosted model** to extract the Graphify knowledge graph from raw agricultural research, ensuring a completely private data pipeline.
-
-```bash
-# Point Graphify to your AMD Cloud instance
-export OPENAI_API_BASE="http://<YOUR_AMD_IP>:8000/v1"
-export OPENAI_API_KEY="not-needed"
-
-# Extract knowledge using AMD hardware
-graphify extract . --backend openai --model llama-3.1-8b-instruct --no-cluster
-```
+*   **Training Hardware:** AMD MI300X Accelerator.
+*   **Technique:** LoRA (Low-Rank Adaptation) with **Rank 64** for deep pattern recognition.
+*   **Budget:** Optimized for a high-performance **3-hour** training window.
+*   **Datasets:** 
+    *   `CGIAR/gardian-ai-ready-docs`: Full corpus of agricultural research.
+    *   `dippatel2506/agri-llm-raw-dataset`: Agriculture-focused text.
+    *   `DARJYO/sawotiQ29_crop_optimization`: Specialized irrigation Q&A.
+*   **Why it matters:** Unlike generic models, `DroughtSense-7B` understands specific drought response factors (Ky) and critical growth stages for 20+ crops.
 
 ---
 
@@ -135,35 +121,63 @@ graphify extract . --backend openai --model llama-3.1-8b-instruct --no-cluster
 
 ### Prerequisites
 *   Python 3.9+
-*   Access to an **AMD Developer Cloud** vLLM endpoint.
+*   An active **AMD Developer Cloud** vLLM endpoint.
 
 ### Installation
-1.  **Clone the repository:**
+1.  **Clone & Install:**
     ```bash
     git clone https://github.com/Ohiodawn/DroughtSense.git
     cd DroughtSense
-    ```
-2.  **Install dependencies:**
-    ```bash
     pip install -r requirements.txt
     ```
-3.  **Configure `.env`:**
+2.  **Configure `.env`:**
     ```ini
     AMD_VLLM_BASE_URL="http://<YOUR_AMD_IP>:8000/v1"
     AMD_API_KEY="your-key"
+    GOOGLE_MAPS_API_KEY="your-optional-key"
     FLASK_SECRET_KEY="your-secret"
     ```
 
-### Running the App
+### Run Commands
+*   **Launch App:** `python app.py`
+*   **Run Tests:** `pytest tests/`
+
+---
+
+## 🧬 Fine-Tuning & Knowledge Extraction
+
+Reproduce our AMD-optimized pipeline in two steps:
+
+1.  **Extract Knowledge Graph:**
+    ```bash
+    export OPENAI_API_BASE="http://<YOUR_AMD_IP>:8000/v1"
+    graphify extract . --backend openai --model llama-3.1-8b-instruct --no-cluster
+    ```
+2.  **Run Fine-Tuning (3 Hours):**
+    ```bash
+    python fine_tuning/prepare_dataset.py
+    python fine_tuning/fine_tune.py  # Optimized for AMD ROCm
+    python fine_tuning/merge_model.py
+    ```
+
+---
+
+## 📂 Project Structure
 ```bash
-python app.py
+├── fine_tuning/      # AMD Training pipeline (Qwen-7B, LoRA, ROCm)
+├── research/         # Agricultural Knowledge Base (Markdown/PDF)
+├── services/         # Multi-agent logic, NASA API, Geospatial utils
+├── static/           # Modern UI Assets (Nature-Tech CSS, main.js)
+├── templates/        # Responsive Flask templates
+├── tests/            # Full Pytest suite (Location, API, Services)
+├── app.py            # Flask API & Agentic Orchestration
+└── README.md         # Professional project documentation
 ```
-Access the dashboard at `http://localhost:5000`.
 
 ---
 
 ## 🏆 Hackathon
-**Built for the AMD Developer Hackathon ACT II on lablab.ai**
+**AMD Developer Hackathon ACT II | lablab.ai**
 *   **Track:** AI Agents and Agentic Workflows
 *   **Infrastructure:** Powered by **AMD Instinct™ MI300X**, **ROCm™**, and **vLLM**.
 
