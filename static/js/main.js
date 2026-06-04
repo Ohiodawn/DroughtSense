@@ -23,10 +23,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const citationsSection = document.getElementById('citationsSection');
     const citationsText = document.getElementById('citationsText');
     const errorSection = document.getElementById('error');
+    const downloadPdfBtn = document.getElementById('downloadPdfBtn');
 
     let trendsChart = null;
     let map = null;
     let marker = null;
+    let lastResult = null;
 
     // Initialize Map
     function initMap() {
@@ -99,6 +101,39 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Handle PDF Download
+    downloadPdfBtn.addEventListener('click', async () => {
+        if (!lastResult) return;
+
+        downloadPdfBtn.disabled = true;
+        const originalText = downloadPdfBtn.innerHTML;
+        downloadPdfBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+
+        try {
+            const response = await fetch('/api/report', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(lastResult)
+            });
+
+            if (!response.ok) throw new Error('Failed to generate PDF');
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `DroughtSense_Report_${lastResult.location.name}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        } catch (err) {
+            alert("Error downloading PDF: " + err.message);
+        } finally {
+            downloadPdfBtn.disabled = false;
+            downloadPdfBtn.innerHTML = originalText;
+        }
+    });
+
     function showLocationSelector(matches) {
         hideAll();
         matchList.innerHTML = '';
@@ -155,6 +190,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function displayResults(data) {
+        lastResult = data;
         const { location, climate_data, assessment } = data;
         
         // Location Info

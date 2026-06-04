@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
+- **PDF Report Generation:** Added a professional 'Download PDF Report' feature for farmers to share assessments with institutions.
+- Created `services/pdf_service.py` using `fpdf2` with custom branding and formatted results.
+- Added a new `/api/report` endpoint and UI download button.
 - **Interactive Mapping:** Integrated **Leaflet.js** to provide a real visual map of the resolved location.
 - Added a visual marker on the map for the exact coordinates being assessed.
 - Implemented automatic map centering and zooming based on geocoding results.

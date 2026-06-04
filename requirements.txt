@@ -8,3 +8,4 @@ gunicorn
 pytest
 requests-mock
 googlemaps
+fpdf2

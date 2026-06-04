@@ -100,5 +100,29 @@ def assess():
         "agent_logs": result['agent_logs']
     })
 
+from services.pdf_service import PDFReportService
+from flask import Response
+
+@app.route('/api/report', methods=['POST'])
+def download_report():
+    """
+    Generates and returns a PDF drought report.
+    """
+    data = request.json
+    location = data.get('location')
+    climate_data = data.get('climate_data')
+    assessment = data.get('assessment')
+
+    if not all([location, climate_data, assessment]):
+        return jsonify({"error": "Incomplete data for report generation"}), 400
+
+    pdf_bytes = PDFReportService.generate_report(location, climate_data, assessment)
+    
+    return Response(
+        pdf_bytes,
+        mimetype="application/pdf",
+        headers={"Content-disposition": f"attachment; filename=DroughtSense_Report_{location['name'].replace(' ', '_')}.pdf"}
+    )
+
 if __name__ == '__main__':
     app.run(debug=True)

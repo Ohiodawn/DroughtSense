@@ -26,5 +26,8 @@ This file tracks potential improvements, optimizations, and feature ideas for Dr
 | 010 | [Current Date] | *30-Day Climate Trend Visualization* | *Visualize the 30-day precipitation and temperature trends using Chart.js to provide visual historical context.* | ✅ `Completed` | *Integrated interactive charts into the result dashboard.* |
 | 011 | [Current Date] | *Google Maps Geocoding* | *Add support for Google Maps API to improve location accuracy and handle fuzzy queries better than OSM.* | ✅ `Completed` | *Added optional Google Maps provider.* |
 | 012 | [Current Date] | *Interactive Map Visualization* | *Add a real visual map (Leaflet.js) to confirm the location to the user.* | ✅ `Completed` | *Added Leaflet.js map with markers.* |
+| 013 | [Current Date] | *Multilingual UI Support* | *Add language localized advice (Hindi, Spanish, Swahili) to reach more farmers.* | 🟢 `Approved` | *Planned for next iteration.* |
+| 014 | [Current Date] | *PDF Report Generation* | *Allow farmers to download a professional PDF of the assessment for banks or aid agencies.* | ✅ `Completed` | *Implemented via fpdf2 and custom PDF service.* |
+| 015 | [Current Date] | *Historical Analogue Comparison* | *Compare current data with major historical drought years in the region.* | 🟢 `Approved` | *Planned for later.* |
 
 *(New suggestions will be added below)*
