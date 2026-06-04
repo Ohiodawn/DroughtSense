@@ -48,25 +48,31 @@ DroughtSense AI bridges the gap between raw scientific data and farm-level actio
 
 ```mermaid
 graph TD
-    User[User Browser] -->|POST /api/assess| Flask[Flask App on Railway]
+    User[User Browser] -->|1. Search| Flask[Flask App on Railway]
     
-    subgraph Context Gathering
-        Flask -->|1. Geocode| Geo[Nominatim / Google Maps]
-        Flask -->|2. Fetch Stats| NASA[NASA POWER API]
-        Flask -->|3. Query Graph| Graphify[Graphify Knowledge Graph]
+    subgraph Context & Data
+        Flask -->|2. Geocode| Geo[Nominatim / Google Maps]
+        Flask -->|3. Fetch Stats| NASA[NASA POWER API]
+        Flask -->|4. Query Graph| Graphify[Graphify Knowledge Base]
     end
 
-    subgraph Multi-Agent Orchestration on AMD MI300X
-        Flask -->|4. Dispatch| Orchestrator[Orchestrator Agent]
-        Orchestrator -->|Analyze Context| Climatologist[Climatologist Agent]
-        Orchestrator -->|Devise Strategy| Agronomist[Agronomist Agent]
+    subgraph Multi-Agent AI Core (AMD MI300X)
+        Flask -->|5. Dispatch| Orchestrator[Orchestrator Agent]
+        Orchestrator -->|Analyze| Climatologist[Climatologist Agent]
+        Orchestrator -->|Strategize| Agronomist[Agronomist Agent]
         Climatologist -.->|vLLM Request| MI300X[AMD MI300X Node]
         Agronomist -.->|vLLM Request| MI300X
-        MI300X -->|Fine-Tuned Qwen-7B| Orchestrator
+        MI300X -->|DroughtSense-7B| Orchestrator
     end
     
-    Orchestrator -->|5. Final Report| Flask
-    Flask -->|6. Visual Dashboard| User
+    subgraph Presentation & Utility
+        Flask -->|6. Render UI| UI[Interactive Dashboard]
+        UI -->|Chart.js| Trends[30-Day Trends]
+        UI -->|Leaflet.js| Map[Geospatial Map]
+        UI -->|fpdf2| PDF[Branded PDF Report]
+    end
+
+    UI --> User
 ```
 
 ---

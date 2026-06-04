@@ -8,32 +8,32 @@ This document provides a technical deep-dive into the architecture of **DroughtS
 
 ```mermaid
 graph TD
-    A[User / Farmer] -->|Enters Region Name| B[Frontend UI HTML/JS]
-    B -->|POST /api/assess {region}| C[Flask Backend]
+    A[User / Farmer] -->|1. Enters Region| B[Frontend UI]
+    B -->|POST /api/assess| C[Flask Backend]
     
     subgraph Context Gathering
-        C -->|1. Geocode Region| D[Geocoding Service]
-        C -->|2. Fetch Climate Data| E[NASA POWER API]
-        C -->|3. Query Graph| F[Graphify Knowledge Graph]
+        C -->|2. Geocode| D[Geocoding Service]
+        C -->|3. Fetch Climate Data| E[NASA POWER API]
+        C -->|4. Query Graph| F[Graphify Knowledge Graph]
     end
     
-    subgraph Multi-Agent Orchestration
-        C -->|4. Dispatch Context| G[Orchestrator Agent]
-        G -->|Climatology Task| H[Climatologist Agent]
-        H -->|Meteorological Risk| G
-        G -->|Agronomy Task| I[Agronomist Agent]
-        I -->|Crop Mitigations| G
+    subgraph Multi-Agent Orchestration (AMD MI300X)
+        C -->|5. Dispatch| G[Orchestrator Agent]
+        G -->|Meteorological Task| H[Climatologist Agent]
+        G -->|Mitigation Task| I[Agronomist Agent]
+        H -.->|vLLM| J[AMD MI300X Node]
+        I -.->|vLLM| J
+        J -->|DroughtSense-7B| G
     end
 
-    subgraph AI Inference / AMD Developer Cloud
-        H -.->|Inference Request| J[AMD MI300X Node]
-        I -.->|Inference Request| J
-        J -->|vLLM Endpoint| K[Fine-Tuned Llama 3.1]
+    subgraph Presentation & Utility
+        C -->|6. Render| K[Interactive Dashboard]
+        K -->|Chart.js| L[30-Day Trends]
+        K -->|Leaflet.js| M[Geospatial Map]
+        K -->|fpdf2| N[Branded PDF Report]
     end
     
-    G -->|5. Synthesize JSON| C
-    C -->|6. Return Report| B
-    B -->|Displays Risk & Recommendations| A
+    K --> A
 ```
 
 ---
