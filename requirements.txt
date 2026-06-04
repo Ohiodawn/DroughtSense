@@ -1,0 +1,6 @@
+flask
+Flask-Caching
+python-dotenv
+requests
+openai
+gunicorn
