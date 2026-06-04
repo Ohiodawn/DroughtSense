@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
+- **Google Maps Integration:** Added optional support for the Google Maps Geocoding API to significantly improve location accuracy.
+- Implemented a provider-based geocoding logic: Google Maps (if key present) -> Nominatim (Fallback).
+- Added `googlemaps` to `requirements.txt`.
 - **Agentic Process Visibility:** Added a terminal-style log to the loading UI to show real-time multi-agent coordination (Climatologist, Agronomist, Synthesizer).
 - **Climate Trend Visualization:** Integrated `Chart.js` to visualize 30-day precipitation and temperature trends.
 - Updated `services/nasa_service.py` to return daily time-series data alongside summarized averages.

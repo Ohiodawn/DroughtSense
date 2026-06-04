@@ -7,3 +7,4 @@ openai
 gunicorn
 pytest
 requests-mock
+googlemaps

@@ -24,5 +24,6 @@ This file tracks potential improvements, optimizations, and feature ideas for Dr
 | 008 | [Current Date] | *Agricultural Fine-Tuning* | *Curate a specialized dataset (crop tolerances, drought mitigation tactics) to fine-tune Llama 3.1 before deploying to AMD MI300X.* | 🟢 `Approved` | *Creates a strong "moat" against generic LLMs. Assigned to Phase 7.* |
 | 009 | [Current Date] | *Agentic Process Visibility (UI)* | *Show 'Agent logs' in the UI (e.g., 'Climatologist is analyzing rainfall patterns...') to make the multi-agent workflow visible to users and judges.* | ✅ `Completed` | *Added terminal-style logs to the loading UI.* |
 | 010 | [Current Date] | *30-Day Climate Trend Visualization* | *Visualize the 30-day precipitation and temperature trends using Chart.js to provide visual historical context.* | ✅ `Completed` | *Integrated interactive charts into the result dashboard.* |
+| 011 | [Current Date] | *Google Maps Geocoding* | *Add support for Google Maps API to improve location accuracy and handle fuzzy queries better than OSM.* | ✅ `Completed` | *Added optional Google Maps provider with Nominatim fallback.* |
 
 *(New suggestions will be added below)*
