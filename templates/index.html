@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DroughtSense AI | Early Warning Agricultural Intelligence</title>
+    <title>DroughtSense AI | Premium Agricultural Intelligence</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
@@ -16,113 +16,114 @@
 <body>
     <div class="container">
         <header>
-            <h1>🌱 DroughtSense AI</h1>
+            <h1>Drought<span>Sense</span> AI</h1>
             <p class="tagline">Hyper-local drought intelligence powered by AMD MI300X.</p>
         </header>
 
         <main>
-            <!-- Search Experience -->
+            <!-- Premium Search Experience -->
             <section class="search-card">
                 <form id="assessForm">
                     <div class="input-group">
-                        <i class="fas fa-location-dot"></i>
-                        <input type="text" id="regionInput" placeholder="Enter region or city (e.g. Maharashtra, India)" required>
+                        <i class="fas fa-location-arrow"></i>
+                        <input type="text" id="regionInput" placeholder="Where is your farm? (e.g. Maharashtra, India)" required>
                     </div>
                     <button type="submit" id="submitBtn" class="main-btn">
-                        <span>Assess Risk</span>
-                        <i class="fas fa-arrow-right"></i>
+                        <span>Analyze Risk</span>
+                        <i class="fas fa-sparkles"></i>
                     </button>
                 </form>
-                <p class="input-hint">Search by province, district, or agricultural region for maximum accuracy.</p>
             </section>
+            <p class="input-hint">Specify city, province, or district for a hyper-local multi-agent assessment.</p>
 
-            <!-- Location Picker -->
-            <section id="locationSelector" class="hidden">
+            <!-- Location Picker Overlay -->
+            <section id="locationSelector" class="hidden" style="margin-top: 40px;">
                 <div class="selector-overlay">
-                    <h3 class="section-title"><i class="fas fa-map-location-dot"></i> Select your region</h3>
-                    <p style="margin-bottom: 20px; color: var(--text-muted);">Multiple matches found. Please be specific:</p>
+                    <h3 class="section-title"><i class="fas fa-map-marked-alt"></i> Refine Location</h3>
+                    <p style="margin-bottom: 25px; color: var(--text-muted); font-weight: 500;">Multiple matches found. Select the precise region:</p>
                     <div id="matchList" class="match-list"></div>
                 </div>
             </section>
 
-            <!-- Loading Experience -->
+            <!-- Agentic Loading State -->
             <section id="loading" class="hidden">
                 <div class="spinner"></div>
-                <h2 id="loadingStatus">Initializing AI Agents...</h2>
+                <h2 id="loadingStatus" style="color: var(--forest-dark); margin-bottom: 20px;">Deploying Intelligence Agents...</h2>
                 <div id="agentLogs" class="agent-terminal"></div>
             </section>
 
             <!-- Result Dashboard -->
             <section id="result" class="hidden">
                 <div class="result-grid">
-                    <!-- Sidebar: Geospatial & Stats -->
+                    <!-- Sidebar -->
                     <aside class="stats-sidebar">
                         <div class="mini-card location-box">
                             <h2 id="resultRegion">Region Name</h2>
-                            <p id="resolvedLocation" style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px;"></p>
+                            <p id="resolvedLocation" style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 15px;"></p>
                             <div id="map" class="map-mini"></div>
-                            <div class="banner-actions">
-                                <button id="downloadPdfBtn" class="main-btn small-btn" style="width: 100%; justify-content: center; margin-bottom: 10px;">
-                                    <i class="fas fa-file-pdf"></i> Download PDF
-                                </button>
-                                <button id="retryLocation" class="main-btn small-btn" style="width: 100%; justify-content: center; background: var(--text-muted);">
-                                    <i class="fas fa-rotate-left"></i> New Search
-                                </button>
-                            </div>
+                            
+                            <button id="downloadPdfBtn" class="main-btn small-btn" style="width: 100%; justify-content: center; margin-bottom: 15px;">
+                                <i class="fas fa-file-pdf"></i> Export Report
+                            </button>
+                            <button id="retryLocation" class="main-btn small-btn" style="width: 100%; justify-content: center; background: #ececec; color: #333;">
+                                <i class="fas fa-search"></i> New Search
+                            </button>
                         </div>
 
                         <div class="mini-card">
-                            <h3 class="section-title" style="font-size: 1rem; margin-bottom: 15px;">Live Indicators</h3>
+                            <h3 class="section-title" style="font-size: 0.9rem; margin-bottom: 20px;">Environmental Metrics</h3>
                             <div class="stats-grid">
                                 <div class="stat-v-item">
-                                    <i class="fas fa-temperature-high"></i>
+                                    <i class="fas fa-temperature-full"></i>
                                     <span class="val" id="tempVal">--</span>
                                     <label>Avg Temp</label>
                                 </div>
                                 <div class="stat-v-item">
-                                    <i class="fas fa-cloud-showers-heavy"></i>
+                                    <i class="fas fa-droplet"></i>
                                     <span class="val" id="precipVal">--</span>
-                                    <label>Rainfall</label>
+                                    <label>Precipitation</label>
                                 </div>
                                 <div class="stat-v-item" style="grid-column: span 2;">
-                                    <i class="fas fa-droplet"></i>
+                                    <i class="fas fa-seedling"></i>
                                     <span class="val" id="soilVal">--</span>
-                                    <label>Soil Moisture Index</label>
+                                    <label>Soil Water Index</label>
                                 </div>
                             </div>
                         </div>
                     </aside>
 
-                    <!-- Main: Intelligence Report -->
+                    <!-- Main Report -->
                     <article class="main-report">
                         <div class="report-header">
-                            <h3 class="section-title"><i class="fas fa-robot"></i> Intelligence Report</h3>
+                            <h3><i class="fas fa-shield-halved" style="color: var(--accent); margin-right: 10px;"></i> Agentic Assessment</h3>
                             <span id="riskBadge" class="risk-badge-lg">Low Risk</span>
                         </div>
 
                         <div class="report-body">
                             <div id="largeRegionWarning" class="warning-banner hidden">
-                                <i class="fas fa-circle-info"></i> Large region detected. Showing 5-point averages.
+                                <i class="fas fa-triangle-exclamation"></i> <strong>Large Region:</strong> Data averaged over 5 coordinates.
                             </div>
 
                             <div class="report-section">
-                                <p id="explanationText" style="font-size: 1.15rem; font-weight: 500; margin-bottom: 30px;"></p>
+                                <p id="explanationText" style="font-size: 1.25rem; font-weight: 500; color: var(--forest-dark); line-height: 1.5; margin-bottom: 40px;"></p>
                             </div>
 
                             <div class="report-section">
-                                <h3 class="section-title"><i class="fas fa-chart-area"></i> 30-Day Trends</h3>
+                                <h3 class="section-title"><i class="fas fa-chart-line"></i> Historical Evidence (30 Days)</h3>
                                 <div class="trends-container">
                                     <canvas id="trendsChart"></canvas>
                                 </div>
                             </div>
 
                             <div class="report-section">
-                                <h3 class="section-title"><i class="fas fa-hand-holding-seedling"></i> Mitigation Strategy</h3>
+                                <h3 class="section-title"><i class="fas fa-list-check"></i> Agronomist Recommendations</h3>
                                 <ul id="recommendationsList" class="rec-list"></ul>
                             </div>
 
                             <div id="citationsSection" class="citation-box hidden">
-                                <h4 style="font-size: 0.9rem; margin-bottom: 5px;"><i class="fas fa-book-open"></i> Scientific Context</h4>
+                                <h4 style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: var(--primary); margin-bottom: 10px;">
+                                    <i class="fas fa-book"></i> Scientific Grounding
+                                </h4>
                                 <p id="citationsText"></p>
                             </div>
                         </div>
@@ -130,18 +131,19 @@
                 </div>
             </section>
 
-            <!-- Error State -->
+            <!-- Error Experience -->
             <section id="error" class="hidden">
-                <div class="error-card">
-                    <i class="fas fa-triangle-exclamation" style="font-size: 1.5rem;"></i>
-                    <p class="error-message"></p>
+                <div class="mini-card" style="text-align: center; border-top: 4px solid var(--critical);">
+                    <i class="fas fa-circle-exclamation" style="font-size: 3rem; color: var(--critical); margin-bottom: 20px;"></i>
+                    <h3 style="margin-bottom: 10px;">System Error</h3>
+                    <p class="error-message" style="color: var(--text-muted); margin-bottom: 30px;"></p>
+                    <button onclick="window.location.reload()" class="main-btn" style="margin: 0 auto;">Reset Application</button>
                 </div>
-                <button onclick="window.location.reload()" class="main-btn" style="margin: 20px auto;">Try Again</button>
             </section>
         </main>
 
-        <footer>
-            <p>© 2026 DroughtSense AI | Powered by AMD MI300X & NASA POWER | ACT II Hackathon</p>
+        <footer style="text-align: center; margin-top: 80px; opacity: 0.6;">
+            <p style="font-size: 0.85rem; font-weight: 600; letter-spacing: 0.5px;">POWERED BY AMD INSTINCT™ MI300X & NASA POWER | LABLAB.AI ACT II</p>
         </footer>
     </div>
 
