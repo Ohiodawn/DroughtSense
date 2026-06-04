@@ -25,6 +25,34 @@ document.addEventListener('DOMContentLoaded', () => {
     const errorSection = document.getElementById('error');
 
     let trendsChart = null;
+    let map = null;
+    let marker = null;
+
+    // Initialize Map
+    function initMap() {
+        if (map) return;
+        map = L.map('map').setView([0, 0], 2);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+    }
+
+    function updateMap(lat, lon, name) {
+        initMap();
+        const coords = [lat, lon];
+        map.setView(coords, 8);
+        
+        if (marker) {
+            marker.setLatLng(coords).setPopupContent(name);
+        } else {
+            marker = L.marker(coords).addTo(map).bindPopup(name).openPopup();
+        }
+        
+        // Fix Leaflet sizing issue in hidden containers
+        setTimeout(() => {
+            map.invalidateSize();
+        }, 100);
+    }
 
     // Handle initial form submission (Geocoding Step)
     assessForm.addEventListener('submit', async (e) => {
@@ -136,6 +164,8 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             largeRegionWarning.classList.add('hidden');
         }
+
+        updateMap(location.lat, location.lon, location.name);
 
         resultRegion.textContent = location.name || "Target Region";
         explanationText.textContent = assessment.explanation;

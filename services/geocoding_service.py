@@ -13,7 +13,7 @@ def geocode_region(region_name):
         return []
 
     google_key = os.getenv('GOOGLE_MAPS_API_KEY')
-    if google_key:
+    if google_key and google_key.strip() and google_key != "your-google-maps-api-key":
         print(f"Using Google Maps for geocoding: {cleaned}")
         results = google_geocode(cleaned, google_key)
         if results:

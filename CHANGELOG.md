@@ -6,7 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
-- **Google Maps Integration:** Added optional support for the Google Maps Geocoding API to significantly improve location accuracy.
+- **Interactive Mapping:** Integrated **Leaflet.js** to provide a real visual map of the resolved location.
+- Added a visual marker on the map for the exact coordinates being assessed.
+- Implemented automatic map centering and zooming based on geocoding results.
+- **Google Maps Integration:** Added optional support for the Google Maps Geocoding API.
 - Implemented a provider-based geocoding logic: Google Maps (if key present) -> Nominatim (Fallback).
 - Added `googlemaps` to `requirements.txt`.
 - **Agentic Process Visibility:** Added a terminal-style log to the loading UI to show real-time multi-agent coordination (Climatologist, Agronomist, Synthesizer).
