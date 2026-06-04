@@ -2,18 +2,24 @@ import os
 import json
 from openai import OpenAI
 
+from services.graph_service import GraphService
+
 class AMDInference:
     @staticmethod
     def assess_drought(region_data):
         """
         Analyzes climate data using real AI inference on AMD MI300X via vLLM.
+        Includes context from the Graphify knowledge graph if available.
         """
         base_url = os.getenv('AMD_VLLM_BASE_URL')
         api_key = os.getenv('AMD_VLLM_API_KEY', 'not-needed')
         
+        # 1. Retrieve Knowledge Graph Context (Phase 4)
+        graph_context = GraphService.get_drought_context()
+        
         if not base_url:
             print("AMD_VLLM_BASE_URL not set, falling back to MockAI")
-            return MockAI.assess_drought(region_data)
+            return MockAI.assess_drought(region_data, graph_context)
 
         client = OpenAI(
             base_url=base_url,
@@ -23,11 +29,14 @@ class AMDInference:
         system_prompt = (
             "You are an expert agricultural and climatology AI assistant. "
             "Analyze the provided climate data for a region and determine the drought risk level. "
+            "Use the provided Scientific Context to ground your assessment.\n\n"
+            f"SCIENTIFIC CONTEXT (from Knowledge Graph):\n{graph_context}\n\n"
             "Your output must be a valid, parsable JSON object with the following schema:\n"
             "{\n"
             "  \"risk_level\": \"Low\" | \"Medium\" | \"High\" | \"Critical\",\n"
             "  \"explanation\": \"2-3 sentence summary\",\n"
-            "  \"recommendations\": [\"tip 1\", \"tip 2\", \"tip 3\"]\n"
+            "  \"recommendations\": [\"tip 1\", \"tip 2\", \"tip 3\"],\n"
+            "  \"citations\": \"Scientific context used (if any)\"\n"
             "}\n"
             "Do not include any text outside the JSON object."
         )
@@ -58,7 +67,7 @@ class AMDInference:
 
 class MockAI:
     @staticmethod
-    def assess_drought(region_data):
+    def assess_drought(region_data, graph_context=""):
         """
         Simulates an AI assessment based on real climate data.
         """
@@ -86,5 +95,6 @@ class MockAI:
                 "Prioritize water allocation for high-value crops.",
                 "Implement mulching to retain soil moisture.",
                 "Monitor local weather forecasts for upcoming rain events."
-            ]
+            ],
+            "citations": "Mock context used" if graph_context else "None"
         }

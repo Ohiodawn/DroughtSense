@@ -8,11 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- **Graphify Integration Plan:** Added Phase 4 to the development lifecycle for Knowledge Graph integration.
-- **Phase 6 Preparation:** Implemented file-based caching for NASA API and Geocoding using `Flask-Caching`.
-- Created `Procfile` for production deployment.
-- Created `.gitignore` to protect environment variables and cache data.
-- **Phase 5 Preparation:** Implemented `AMDInference` class in `services/ai_service.py`.
+- **Public Repository Live:** Synchronized local project with `Ohiodawn/DroughtSense` on GitHub.
+- **Production Deployment:** Application is live on **Railway**.
+- **Phase 4 & 5 Complete:** Integrated Graphify knowledge retrieval and assembled the final backend orchestration pipeline.
+- Created `services/graph_service.py` and updated AI service to include scientific context.
+- Updated UI with "Scientific Citations" and improved styling/icons.
+- **Phase 6 Preparation:** Implemented file-based caching for NASA API and Geocoding.
 
 ### Changed
 - Shifted project strategy to **Local-First**, prioritizing local backend/frontend development and data integration before AMD Cloud setup.

@@ -11,6 +11,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const riskBadge = document.getElementById('riskBadge');
     const explanationText = document.getElementById('explanationText');
     const recommendationsList = document.getElementById('recommendationsList');
+    const citationsSection = document.getElementById('citationsSection');
+    const citationsText = document.getElementById('citationsText');
 
     assessForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -74,6 +76,14 @@ document.addEventListener('DOMContentLoaded', () => {
             li.innerHTML = `<i class="fas fa-check-circle"></i> ${rec}`;
             recommendationsList.appendChild(li);
         });
+
+        // Handle Citations
+        if (assessment.citations && assessment.citations !== "None") {
+            citationsText.textContent = assessment.citations;
+            citationsSection.classList.remove('hidden');
+        } else {
+            citationsSection.classList.add('hidden');
+        }
 
         resultSection.classList.remove('hidden');
         resultSection.scrollIntoView({ behavior: 'smooth' });

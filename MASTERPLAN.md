@@ -43,13 +43,13 @@ DroughtSense AI is a web-based AI agent designed to help farmers and agricultura
 - [x] Implement backend-to-AI logic (Cloud-ready).
 
 ### **Phase 4: Knowledge Graph (Graphify)**
-- [ ] Install `graphify` and index research/codebase.
-- [ ] Set up MCP server for graph queries.
-- [ ] Integrate graph context into the assessment pipeline.
+- [x] Install `graphify` and index research/codebase.
+- [x] Set up MCP server for graph queries.
+- [x] Integrate graph context into the assessment pipeline.
 
 ### **Phase 5: Backend Orchestration**
 - [x] Create `/api/assess` endpoint.
-- [ ] Integrate Graphify context into the final API output.
+- [x] Integrate Graphify context into the final API output.
 
 ### **Phase 6: Frontend Development**
 - [x] Build mobile-responsive UI.
@@ -57,7 +57,8 @@ DroughtSense AI is a web-based AI agent designed to help farmers and agricultura
 
 ### **Phase 7: AMD Cloud Integration**
 - [ ] Provision AMD MI300X.
-- [ ] Switch to real AMD Inference.
+- [ ] Switch to real AMD Inference (Awaiting AMD readiness).
 
 ### **Phase 8: Submission**
-- [ ] Deployment and Submission materials.
+- [x] Deployment to Railway (LIVE).
+- [ ] Final Submission materials.
