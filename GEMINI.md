@@ -47,9 +47,13 @@ The project follows a **Local-First** strategy, building out the intelligence an
 *   **Completion Condition:** User can input a city and see a formatted, evidence-backed drought report.
 
 ### Phase 7: AMD Fine-Tuning & Deployment (The Moat)
-*   **System Development Focus:** Fine-tuning an open-source model on agricultural data and deploying to MI300X.
-*   **Stages:** Dataset curation, Fine-tuning process, Provisioning MI300X, deploying vLLM with the custom model.
-*   **Completion Condition:** Real-time multi-agent inference running on the custom fine-tuned model via AMD hardware.
+*   **System Development Focus:** Fine-tuning an open-source model (Qwen 2.5) on agricultural data and deploying to MI300X.
+*   **Stages:** 
+    *   Dataset curation (CGIAR, Agri-LLM, Crop Optimization).
+    *   LoRA fine-tuning run on AMD MI300X (Native ROCm).
+    *   Adapter merging and quantization.
+    *   vLLM deployment of the custom `DroughtSense-Qwen` model.
+*   **Completion Condition:** Real-time multi-agent inference running on the unique fine-tuned model via AMD hardware.
 
 ### Phase 8: Production & Submission (Release Layer)
 *   **Stages:** Gunicorn setup, Deployment (Render/Railway), E2E Testing, Video/Deck creation.
