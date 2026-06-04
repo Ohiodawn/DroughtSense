@@ -6,9 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
-- **Local LLM Integration:** Added `OllamaProvider` to `services/ai_service.py` to support real local inference during development.
-- Implemented dynamic provider switching: AMD (Primary) -> Ollama (Optional) -> Mock (Fallback).
-- Added `USE_OLLAMA` toggle to `.env.example`.
+- **llama.cpp Integration:** Added `LlamaCppProvider` to `services/ai_service.py` to support inference via local llama.cpp servers.
+- Refactored local provider selection to use `LOCAL_AI_PROVIDER` environment variable (supporting `ollama`, `llama.cpp`, and `mock`).
+- **Local LLM Integration:** Added `OllamaProvider` to `services/ai_service.py`.
 - **Automated Testing:** Implemented a unit test suite using `pytest` and `requests-mock`.
 - Created `tests/test_geocoding.py` and `tests/test_nasa_service.py` with full coverage for data acquisition.
 - Added `pytest` and `requests-mock` to `requirements.txt`.

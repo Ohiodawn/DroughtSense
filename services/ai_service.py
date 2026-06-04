@@ -18,12 +18,17 @@ class AMDInference:
         graph_context = GraphService.get_drought_context()
         
         if not base_url:
-            use_ollama = os.getenv('USE_OLLAMA', 'false').lower() == 'true'
-            if use_ollama:
+            local_provider = os.getenv('LOCAL_AI_PROVIDER', 'mock').lower()
+            
+            if local_provider == 'ollama':
                 print("AMD_VLLM_BASE_URL not set, falling back to Ollama")
                 return OllamaProvider.assess_drought(region_data, graph_context)
+            elif local_provider == 'llama.cpp':
+                print("AMD_VLLM_BASE_URL not set, falling back to llama.cpp")
+                return LlamaCppProvider.assess_drought(region_data, graph_context)
             else:
-                print("AMD_VLLM_BASE_URL not set, falling back to MockAI")
+                if local_provider != 'mock':
+                    print(f"Unknown provider '{local_provider}', falling back to MockAI")
                 return MockAI.assess_drought(region_data, graph_context)
 
         client = OpenAI(
@@ -69,6 +74,56 @@ class AMDInference:
         except Exception as e:
             print(f"AMD Inference Error: {e}")
             return MockAI.assess_drought(region_data)
+
+class LlamaCppProvider:
+    @staticmethod
+    def assess_drought(region_data, graph_context=""):
+        """
+        Analyzes climate data using a local llama.cpp server.
+        """
+        client = OpenAI(
+            base_url="http://localhost:8080/v1",
+            api_key="llama.cpp"
+        )
+        
+        system_prompt = (
+            "You are an expert agricultural and climatology AI assistant. "
+            "Analyze the provided climate data for a region and determine the drought risk level. "
+            "Use the provided Scientific Context to ground your assessment.\n\n"
+            f"SCIENTIFIC CONTEXT (from Knowledge Graph):\n{graph_context}\n\n"
+            "Your output must be a valid, parsable JSON object with the following schema:\n"
+            "{\n"
+            "  \"risk_level\": \"Low\" | \"Medium\" | \"High\" | \"Critical\",\n"
+            "  \"explanation\": \"2-3 sentence summary\",\n"
+            "  \"recommendations\": [\"tip 1\", \"tip 2\", \"tip 3\"],\n"
+            "  \"citations\": \"Scientific context used (if any)\"\n"
+            "}\n"
+            "Do not include any text outside the JSON object."
+        )
+        
+        user_content = (
+            f"Analyze drought risk for {region_data.get('region')}.\n"
+            f"Last 30 days data:\n"
+            f"- Avg Temp: {region_data.get('temperature')}°C\n"
+            f"- Total Precip: {region_data.get('precipitation')}mm\n"
+            f"- Soil Moisture: {region_data.get('soil_moisture')}"
+        )
+        
+        try:
+            response = client.chat.completions.create(
+                model="local-model", 
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_content}
+                ]
+            )
+            
+            result = response.choices[0].message.content
+            return json.loads(result)
+            
+        except Exception as e:
+            print(f"llama.cpp Inference Error: {e}")
+            return MockAI.assess_drought(region_data, graph_context)
 
 class OllamaProvider:
     @staticmethod
