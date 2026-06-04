@@ -4,149 +4,188 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DroughtSense | Agricultural Intelligence System</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=2.1">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=2.2">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Fira+Code&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Fira+Code&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 </head>
 <body>
+    <!-- Sticky System Header -->
+    <header class="system-header">
+        <div class="header-inner">
+            <div class="system-title">
+                <div class="heartbeat"></div>
+                <h1>DroughtSense AI</h1>
+            </div>
+            <span class="tagline">System_Operational // AMD_MI300X_Core</span>
+        </div>
+    </header>
+
     <div class="container">
-        <header>
-            <h1>DroughtSense AI</h1>
-            <span class="tagline">System Status: Operational | Powered by AMD MI300X</span>
-        </header>
-
         <main>
-            <!-- Functional Search Input -->
-            <section class="search-card">
-                <form id="assessForm">
-                    <div class="input-group">
-                        <i class="fas fa-search-location"></i>
-                        <input type="text" id="regionInput" placeholder="Enter target region (City, State, Country)" required>
-                    </div>
-                    <button type="submit" id="submitBtn" class="main-btn">
-                        <span>Analyze</span>
-                        <i class="fas fa-play"></i>
-                    </button>
-                </form>
-                <p class="input-hint">Search Protocol: EN-LATIN | Required: Valid Administrative Name</p>
-            </section>
+            <!-- System Alert Container -->
+            <div id="alertContainer" class="hidden"></div>
 
-            <!-- Location Match Selector -->
-            <section id="locationSelector" class="hidden">
-                <div class="selector-box">
-                    <span class="section-label">Ambiguous Location Resolution</span>
-                    <p style="margin-bottom: 16px;">Multiple database matches. Select intended region:</p>
-                    <div id="matchList" class="match-list"></div>
+            <!-- Dashboard Toolbar -->
+            <section class="search-card">
+                <div id="progressBar" class="progress-bar-container">
+                    <div id="progressFill" class="progress-bar-fill"></div>
+                </div>
+                <div class="search-inner">
+                    <form id="assessForm">
+                        <div class="input-group">
+                            <i class="fas fa-microscope"></i>
+                            <input type="text" id="regionInput" placeholder="Analyze Region (e.g. Maharashtra, India)" required>
+                        </div>
+                        <button type="submit" id="submitBtn" class="main-btn">
+                            <span>Analyze</span>
+                            <i class="fas fa-terminal"></i>
+                        </button>
+                    </form>
+                    <p class="input-hint">> EN-LATIN_PROTOCOL_ENABLED // MAX_QUERY_LENGTH: 100</p>
                 </div>
             </section>
 
-            <!-- System Processing Logs -->
+            <!-- Ambiguity Resolver -->
+            <section id="locationSelector" class="hidden" style="margin-bottom: 40px;">
+                <div class="panel">
+                    <div class="panel-header">
+                        <i class="fas fa-triangle-exclamation"></i>
+                        <h3>Ambiguous Location Resolution</h3>
+                    </div>
+                    <div class="panel-body">
+                        <p style="margin-bottom: 20px; font-weight: 500;">Multiple geographical matches detected. Select specific target:</p>
+                        <div id="matchList"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Execution Logs -->
             <section id="loading" class="hidden">
                 <div class="spinner"></div>
                 <h3 id="loadingStatus">Initializing Assessment Sequence...</h3>
                 <div id="agentLogs" class="agent-terminal"></div>
             </section>
 
-            <!-- Dashboard Result Grid -->
+            <!-- Primary Dashboard -->
             <section id="result" class="hidden">
                 <div class="result-grid">
-                    <!-- Sidebar: Technical Specs -->
+                    <!-- Left Column: Specs -->
                     <aside class="stats-sidebar">
                         <div class="panel">
-                            <h3><i class="fas fa-location-dot"></i> Geolocation Data</h3>
-                            <h2 id="resultRegion" style="font-size: 1.4rem; margin-bottom: 4px;">--</h2>
-                            <p id="resolvedLocation" style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 16px;"></p>
-                            <div id="map" class="map-mini"></div>
-                            
-                            <div class="action-panel">
-                                <button id="downloadPdfBtn" class="main-btn small-btn" style="flex: 1;">
-                                    <i class="fas fa-file-export"></i> PDF
-                                </button>
-                                <button id="retryLocation" class="main-btn small-btn" style="background: #666;">
-                                    <i class="fas fa-undo"></i> Reset
-                                </button>
+                            <div class="panel-header">
+                                <i class="fas fa-location-crosshairs"></i>
+                                <h3>Geospatial Context</h3>
+                            </div>
+                            <div class="panel-body">
+                                <h2 id="resultRegion" style="margin-bottom: 4px;">--</h2>
+                                <p id="resolvedLocation" style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 20px; font-family: var(--font-mono);"></p>
+                                <div id="map" class="map-box"></div>
+                                <div class="action-panel">
+                                    <button id="downloadPdfBtn" class="main-btn small-btn" style="flex: 1;">
+                                        <i class="fas fa-download"></i> PDF Report
+                                    </button>
+                                    <button id="retryLocation" class="main-btn small-btn" style="background: var(--text-muted);">
+                                        <i class="fas fa-rotate"></i> Reset
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
                         <div class="panel">
-                            <h3><i class="fas fa-gauge-high"></i> Sensor Readings</h3>
-                            <div class="stats-grid">
-                                <div class="stat-item">
-                                    <i class="fas fa-temperature-three-quarters"></i>
-                                    <label>Avg Temp</label>
-                                    <span class="val" id="tempVal">--</span>
-                                </div>
-                                <div class="stat-item">
-                                    <i class="fas fa-raindrops"></i>
-                                    <label>Rainfall</label>
-                                    <span class="val" id="precipVal">--</span>
-                                </div>
-                                <div class="stat-item">
-                                    <i class="fas fa-water"></i>
-                                    <label>Soil Water</label>
-                                    <span class="val" id="soilVal">--</span>
+                            <div class="panel-header">
+                                <i class="fas fa-gauge-simple-high"></i>
+                                <h3>Environmental Sensors</h3>
+                            </div>
+                            <div class="panel-body">
+                                <div class="sensor-group">
+                                    <div class="sensor-card">
+                                        <div class="sensor-info">
+                                            <i class="fas fa-temperature-half"></i>
+                                            <label>Air Temp</label>
+                                        </div>
+                                        <span class="sensor-val" id="tempVal">--</span>
+                                    </div>
+                                    <div class="sensor-card">
+                                        <div class="sensor-info">
+                                            <i class="fas fa-cloud-rain"></i>
+                                            <label>Rainfall</label>
+                                        </div>
+                                        <span class="sensor-val" id="precipVal">--</span>
+                                    </div>
+                                    <div class="sensor-card" style="flex-direction: column; align-items: flex-start; gap: 8px;">
+                                        <div style="display: flex; justify-content: space-between; width: 100%;">
+                                            <div class="sensor-info">
+                                                <i class="fas fa-faucet-drip"></i>
+                                                <label>Soil Moisture</label>
+                                            </div>
+                                            <span class="sensor-val" id="soilVal">--</span>
+                                        </div>
+                                        <div class="gauge-container" style="width: 100%;">
+                                            <div class="gauge-track">
+                                                <div id="soilFill" class="gauge-fill"></div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </aside>
 
-                    <!-- Main Report: Technical Intelligence -->
-                    <article class="main-report">
-                        <div class="risk-header">
-                            <div>
-                                <span class="section-label">Automated Assessment</span>
-                                <h3 id="reportTitle" style="color: var(--primary-dark);">Drought Vulnerability Report</h3>
-                            </div>
-                            <span id="riskBadge" class="risk-badge">--</span>
-                        </div>
-
-                        <div class="report-section">
-                            <div id="largeRegionWarning" class="warning-banner hidden" style="margin-bottom: 16px;">
-                                <i class="fas fa-triangle-exclamation"></i> DATA_AVG: Bounding Box Centroid + 4 Offsets Applied.
+                    <!-- Right Column: Intel -->
+                    <article class="main-content">
+                        <div class="panel" style="overflow: hidden;">
+                            <div class="risk-indicator">
+                                <div>
+                                    <span class="section-label">Classification Output</span>
+                                    <h2 style="color: var(--primary-dark); font-weight: 900;">Intelligence Assessment</h2>
+                                </div>
+                                <span id="riskBadge" class="risk-level-badge">--</span>
                             </div>
 
-                            <span class="section-label">Agent Analysis Summary</span>
-                            <p id="explanationText" class="explanation-text"></p>
+                            <div class="panel-body" style="padding: 0 40px 40px;">
+                                <div id="largeRegionWarning" class="system-alert hidden" style="background: #fff8e1; border-color: #ffe082; color: #795548;">
+                                    <i class="fas fa-circle-info"></i> LARGE_REGION_DETECTED: Radius-Averaging enabled.
+                                </div>
 
-                            <span class="section-label">30-Day Interannual Variance</span>
-                            <div class="trends-container">
-                                <canvas id="trendsChart"></canvas>
-                            </div>
+                                <div class="explanation-area">
+                                    <p id="explanationText"></p>
+                                </div>
 
-                            <span class="section-label">Operational Directives</span>
-                            <div id="recommendationsList" class="rec-grid"></div>
+                                <div class="trends-area">
+                                    <span class="section-label">Interannual Data Correlation (30 Days)</span>
+                                    <div style="height: 100%;">
+                                        <canvas id="trendsChart"></canvas>
+                                    </div>
+                                </div>
 
-                            <div id="citationsSection" class="citation-box hidden">
-                                <span class="section-label">Reference Material</span>
-                                <p id="citationsText"></p>
+                                <div class="report-section-pro">
+                                    <span class="section-label">Operational Directives</span>
+                                    <div id="recommendationsList" class="rec-container"></div>
+                                </div>
+
+                                <div id="citationsSection" class="citation-box hidden">
+                                    <span class="section-label">Knowledge Graph Citations</span>
+                                    <p id="citationsText"></p>
+                                </div>
                             </div>
                         </div>
                     </article>
                 </div>
             </section>
-
-            <!-- Error Terminal -->
-            <section id="error" class="hidden">
-                <div class="panel" style="border-top: 4px solid var(--critical);">
-                    <h3 style="color: var(--critical);"><i class="fas fa-bug"></i> Hardware/API Exception</h3>
-                    <p class="error-message" style="margin: 16px 0; font-family: var(--font-mono);"></p>
-                    <button onclick="window.location.reload()" class="main-btn">Re-initialize</button>
-                </div>
-            </section>
         </main>
 
-        <footer style="margin-top: 48px; border-top: 1px solid var(--border); padding-top: 16px;">
-            <p style="font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary); text-align: center;">
-                DS-AI_V2.1 // INFRA: AMD_INSTINCT_MI300X // DATA: NASA_POWER_REST // GEO: OSM_NOMINATIM
+        <footer style="margin-top: 60px; text-align: center; opacity: 0.5;">
+            <p style="font-family: var(--font-mono); font-size: 10px; color: var(--text-secondary);">
+                DS_PRO_V2.2 // CORE: AMD_MI300X_ROCm // DATA: NASA_POWER_LARC // GEO: OSM_NOMINATIM
             </p>
         </footer>
     </div>
 
-    <script src="{{ url_for('static', filename='js/main.js') }}?v=2.1"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}?v=2.2"></script>
 </body>
 </html>
