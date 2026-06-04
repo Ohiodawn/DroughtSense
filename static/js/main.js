@@ -30,54 +30,51 @@ document.addEventListener('DOMContentLoaded', () => {
     let marker = null;
     let lastResult = null;
 
-    // Premium Map Style (Voyager by CARTO)
+    // Utilitarian Map Setup
     function initMap() {
         if (map) return;
         map = L.map('map', {
-            zoomControl: false,
+            zoomControl: true,
             scrollWheelZoom: false,
-            dragging: !L.Browser.mobile
+            dragging: true
         }).setView([0, 0], 2);
         
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-            subdomains: 'abcd',
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; OpenStreetMap contributors',
             maxZoom: 20
         }).addTo(map);
-
-        L.control.zoom({ position: 'bottomright' }).addTo(map);
     }
 
     function updateMap(lat, lon, name) {
         initMap();
         const coords = [lat, lon];
-        map.setView(coords, 11); // Closer zoom for hyper-local feel
+        map.setView(coords, 9);
         
         if (marker) {
-            marker.setLatLng(coords).setPopupContent(`<b>${name}</b>`);
+            marker.setLatLng(coords).setPopupContent(name);
         } else {
-            marker = L.marker(coords).addTo(map).bindPopup(`<b>${name}</b>`).openPopup();
+            marker = L.marker(coords).addTo(map).bindPopup(name).openPopup();
         }
         
-        setTimeout(() => map.invalidateSize(), 300);
+        setTimeout(() => map.invalidateSize(), 200);
     }
 
-    // Handle Search
+    // Handle Form submission
     assessForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const region = regionInput.value.trim();
         if (!region) return;
 
-        // English-only validation
+        // Enforce English (Latin) characters only
         const englishOnly = region.replace(/[^a-zA-Z0-9\s,\-]/g, "");
         if (englishOnly.length !== region.length || region.length < 2) {
-            showError("Please use English characters (min 2 characters).");
+            showError("System requires English (Latin) characters only (min 2 chars).");
             return;
         }
 
         hideAll();
         loadingSection.classList.remove('hidden');
-        loadingStatus.textContent = "Acquiring Geospatial Context...";
+        loadingStatus.textContent = "PROTOCOL: REGION_LOOKUP...";
         agentLogs.innerHTML = '';
         submitBtn.disabled = true;
 
@@ -89,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             const data = await response.json();
-            if (!response.ok) throw new Error(data.error || 'Geocoding failed');
+            if (!response.ok) throw new Error(data.error || 'RESOLUTION_FAILED');
 
             if (data.matches.length === 1) {
                 runAssessment(data.matches[0]);
@@ -108,13 +105,13 @@ document.addEventListener('DOMContentLoaded', () => {
         matchList.innerHTML = '';
         matches.forEach(match => {
             const div = document.createElement('div');
-            div.className = 'match-item-new';
+            div.className = 'match-row';
             div.innerHTML = `
                 <div>
-                    <strong style="color: var(--forest-dark); font-size: 1.1rem;">${match.display_name}</strong><br>
-                    <small style="color: var(--text-muted); text-transform: uppercase; font-weight: 700; font-size: 0.7rem;">${match.type} • ${match.lat.toFixed(2)}°N, ${match.lon.toFixed(2)}°E</small>
+                    <strong>${match.display_name}</strong><br>
+                    <small style="color: #666;">COORDS: ${match.lat.toFixed(4)}, ${match.lon.toFixed(4)} | TYPE: ${match.type}</small>
                 </div>
-                <i class="fas fa-arrow-right" style="color: var(--primary); font-size: 1.2rem;"></i>
+                <i class="fas fa-chevron-right"></i>
             `;
             div.onclick = () => runAssessment(match);
             matchList.appendChild(div);
@@ -125,7 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function runAssessment(location) {
         hideAll();
         loadingSection.classList.remove('hidden');
-        loadingStatus.textContent = "Interrogating NASA Satellite Networks...";
+        loadingStatus.textContent = "PROTOCOL: FETCH_NASA_DATA...";
         submitBtn.disabled = true;
 
         try {
@@ -136,7 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             const data = await response.json();
-            if (!response.ok) throw new Error(data.error || 'Assessment failed');
+            if (!response.ok) throw new Error(data.error || 'ANALYSIS_FAILED');
 
             await showAgentLogs(data.agent_logs);
             displayResults(data);
@@ -151,12 +148,12 @@ document.addEventListener('DOMContentLoaded', () => {
     async function showAgentLogs(logs) {
         agentLogs.innerHTML = '';
         for (const log of logs) {
-            loadingStatus.textContent = log.status;
+            loadingStatus.textContent = `AGENT_${log.agent.toUpperCase()}: EXEC...`;
             const logEl = document.createElement('div');
             logEl.className = 'log-entry';
-            logEl.innerHTML = `<span style="color: var(--accent)">➔</span> [${log.agent}] ${log.status}`;
+            logEl.innerHTML = `> [${new Date().toLocaleTimeString()}] ${log.agent}: ${log.status}`;
             agentLogs.appendChild(logEl);
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            await new Promise(resolve => setTimeout(resolve, 600));
         }
     }
 
@@ -164,7 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
         lastResult = data;
         const { location, climate_data, assessment } = data;
         
-        resolvedLocation.textContent = location.display_name;
+        resolvedLocation.textContent = `RESOLVED_ID: ${location.display_name}`;
         if (location.is_large) {
             largeRegionWarning.classList.remove('hidden');
         } else {
@@ -180,17 +177,17 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('precipVal').textContent = `${climate_data.precipitation}mm`;
         document.getElementById('soilVal').textContent = `${Math.round(climate_data.soil_moisture * 100)}%`;
 
-        riskBadge.textContent = `${assessment.risk_level} Risk`;
-        riskBadge.className = 'risk-badge-lg ' + assessment.risk_level.toLowerCase();
+        riskBadge.textContent = `VULNERABILITY: ${assessment.risk_level}`;
+        riskBadge.className = 'risk-badge ' + assessment.risk_level.toLowerCase();
 
         if (climate_data.daily_series) renderTrends(climate_data.daily_series);
         
         recommendationsList.innerHTML = '';
         assessment.recommendations.forEach(rec => {
-            const li = document.createElement('li');
-            li.className = 'rec-item';
-            li.innerHTML = `<i class="fas fa-check-circle"></i> <span>${rec}</span>`;
-            recommendationsList.appendChild(li);
+            const div = document.createElement('div');
+            div.className = 'rec-box';
+            div.innerHTML = `<i class="fas fa-check-square"></i> <span>${rec}</span>`;
+            recommendationsList.appendChild(div);
         });
 
         if (assessment.citations && assessment.citations !== "None") {
@@ -220,37 +217,35 @@ document.addEventListener('DOMContentLoaded', () => {
                 labels: labels,
                 datasets: [
                     {
-                        label: 'Rainfall (mm)',
+                        label: 'PRECIP (mm)',
                         data: series.precip,
-                        borderColor: '#1b5e20',
-                        backgroundColor: 'rgba(27, 94, 32, 0.05)',
-                        borderWidth: 4,
+                        borderColor: '#2e7d32',
+                        backgroundColor: 'rgba(46, 125, 50, 0.05)',
+                        borderWidth: 2,
                         yAxisID: 'y',
                         fill: true,
-                        pointRadius: 0,
-                        tension: 0.4
+                        pointRadius: 2,
+                        tension: 0.1
                     },
                     {
-                        label: 'Temp (°C)',
+                        label: 'TEMP (°C)',
                         data: series.temp,
-                        borderColor: '#e74c3c',
-                        borderWidth: 4,
+                        borderColor: '#f4511e',
+                        borderWidth: 2,
                         yAxisID: 'y1',
-                        pointRadius: 0,
-                        tension: 0.4
+                        pointRadius: 2,
+                        tension: 0.1
                     }
                 ]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                interaction: { mode: 'index', intersect: false },
                 scales: {
-                    x: { grid: { display: false }, ticks: { font: { weight: '600' } } },
-                    y: { type: 'linear', display: true, position: 'left', title: { display: true, text: 'Rainfall (mm)', font: { weight: '800' } } },
-                    y1: { type: 'linear', display: true, position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: 'Temp (°C)', font: { weight: '800' } } }
+                    y: { type: 'linear', display: true, position: 'left', grid: { color: '#eee' } },
+                    y1: { type: 'linear', display: true, position: 'right', grid: { display: false } }
                 },
-                plugins: { legend: { position: 'top', labels: { font: { weight: '700' }, usePointStyle: true, boxWidth: 8 } } }
+                plugins: { legend: { position: 'bottom' } }
             }
         });
     }
@@ -280,7 +275,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!lastResult) return;
         downloadPdfBtn.disabled = true;
         const originalText = downloadPdfBtn.innerHTML;
-        downloadPdfBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Processing...';
+        downloadPdfBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> EXPORTING...';
 
         try {
             const response = await fetch('/api/report', {
@@ -288,17 +283,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(lastResult)
             });
-            if (!response.ok) throw new Error('Failed to generate PDF');
+            if (!response.ok) throw new Error('PDF_GEN_FAILED');
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `DroughtSense_Report_${lastResult.location.name}.pdf`;
+            a.download = `DS_Report_${lastResult.location.name}.pdf`;
             document.body.appendChild(a);
             a.click();
             a.remove();
         } catch (err) {
-            alert("Error downloading PDF: " + err.message);
+            alert("ERROR: " + err.message);
         } finally {
             downloadPdfBtn.disabled = false;
             downloadPdfBtn.innerHTML = originalText;
